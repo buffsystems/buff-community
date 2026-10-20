@@ -9,7 +9,7 @@
 #      даёт каждому контейнеру своё пространство времени, Sysbox 0.7 его не знает), запас сетей.
 #   4. Сторож клина sysbox-fs раз в минуту (cron).
 #   5. Текущего пользователя — в группу docker.
-#   6. Образ выпуска — с buff.systems (BUFF_VERSION из .env), без реестра.
+#   6. Образ выпуска — с GitHub (ghcr.io), либо из файла в images/ для закрытого контура.
 #   7. Если рядом лежит docker-compose.yml — `docker compose up -d`.
 #
 # Запуск: обычным пользователем с sudo (не под root):  ./install.sh
@@ -105,26 +105,22 @@ D="sudo docker"
 say "проверяю Sysbox живым контейнером"
 $D run --rm --runtime=sysbox-runc alpine:3.20 true >/dev/null && say "Sysbox работает"
 
-# ---- 6. Образ установки — с нашего сайта (#619) ----------------------------------------------
-# Реестра у заказчика нет: образ выпуска лежит на buff.systems как файл. Нужная версия —
-# BUFF_VERSION в .env (пин выпуска); пусто — образ должен быть загружен в docker заранее.
+# ---- 6. Образ установки (#619) -------------------------------------------------------------
+# Образ выпуска лежит на GitHub (ghcr.io) — docker pull. Закрытый контур: файл образа и его
+# .sha256 в images/ (перенесены носителем) загружаются вместо скачивания.
 fetch_image() {
-  local image="$1" version="$2" base="$3" dir="$HERE/images" file="buff-community.tar.zst"
+  local image="$1" dir="$HERE/images" file="buff-community.tar.zst"
   if sudo docker image inspect "$image" >/dev/null 2>&1; then say "образ $image уже в docker"; return 0; fi
-  command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
   mkdir -p "$dir"
-  # Файл уже лежит в images/ (перенесён носителем, закрытый контур) — скачивание не нужно.
   if [ -s "$dir/$file" ] && [ -s "$dir/$file.sha256" ]; then
-    say "образ из $dir/$file (скачивание пропущено)"
+    command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
+    (cd "$dir" && sha256sum -c --quiet "$file.sha256") || die "образ в $dir не сходится с контрольной суммой"
+    say "загружаю образ из $dir/$file"
+    zstd -dc "$dir/$file" | sudo docker load >/dev/null
   else
-    [ -n "$version" ] || die "образа $image нет ни в docker, ни в $dir, а BUFF_VERSION в .env пуст — нечего скачивать"
-    say "скачиваю образ $version с $base"
-    curl -fL --retry 3 -o "$dir/$file" "$base/$version/$file"
-    curl -fL --retry 3 -o "$dir/$file.sha256" "$base/$version/$file.sha256"
+    say "скачиваю образ $image"
+    sudo docker pull "$image" || die "образ $image не скачался — проверьте BUFF_IMAGE и доступ к ghcr.io"
   fi
-  (cd "$dir" && sha256sum -c --quiet "$file.sha256") || die "образ не сходится с контрольной суммой"
-  say "загружаю образ в docker"
-  zstd -dc "$dir/$file" | sudo docker load >/dev/null
   sudo docker image inspect "$image" >/dev/null 2>&1 || die "после загрузки образа $image в docker нет — проверьте BUFF_IMAGE"
 }
 
@@ -150,7 +146,7 @@ fi
 # ---- 7. Сборка -------------------------------------------------------------------------------
 if [ -f "$HERE/docker-compose.yml" ]; then
   envget() { grep "^$1=" "$HERE/.env" | head -1 | cut -d= -f2-; }
-  fetch_image "$(envget BUFF_IMAGE)" "$(envget BUFF_VERSION)" "$(envget BUFF_DOWNLOADS)"
+  fetch_image "$(envget BUFF_IMAGE)"
   say "поднимаю сборку: docker compose up -d"
   (cd "$HERE" && $D compose up -d)
   say "готово — приложение: $(grep ^APP_URL= "$HERE/.env" | cut -d= -f2-), админка — порт 8150; первый старт занимает несколько минут: docker compose logs -f buff"

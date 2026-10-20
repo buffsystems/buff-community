@@ -114,9 +114,14 @@ fetch_image() {
   [ -n "$version" ] || die "образа $image нет в docker, а BUFF_VERSION в .env пуст — нечего скачивать"
   command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
   mkdir -p "$dir"
-  say "скачиваю образ $version с $base"
-  curl -fL --retry 3 -o "$dir/$file" "$base/$version/$file"
-  curl -fL --retry 3 -o "$dir/$file.sha256" "$base/$version/$file.sha256"
+  # Файл уже лежит в images/ (перенесён носителем, закрытый контур) — скачивание не нужно.
+  if [ -s "$dir/$file" ] && [ -s "$dir/$file.sha256" ]; then
+    say "образ из $dir/$file (скачивание пропущено)"
+  else
+    say "скачиваю образ $version с $base"
+    curl -fL --retry 3 -o "$dir/$file" "$base/$version/$file"
+    curl -fL --retry 3 -o "$dir/$file.sha256" "$base/$version/$file.sha256"
+  fi
   (cd "$dir" && sha256sum -c --quiet "$file.sha256") || die "образ не сходится с контрольной суммой"
   say "загружаю образ в docker"
   zstd -dc "$dir/$file" | sudo docker load >/dev/null

@@ -59,3 +59,7 @@ docker compose pull && docker compose up -d
 ---
 
 **English.** Buff Community Edition: free, for internal use of one organisation. Requirements: a dedicated Ubuntu 22.04/24.04 VM (kernel ≥ 5.7, 8 CPU, 32 GB RAM, 300 GB disk), a sudo user, internet access, an OpenAI-compatible model endpoint key. Install: clone, `./install.sh`, fill `ORG`, `ADMIN_*`, `LLM_*` in `.env`, `docker compose up -d`. App at `http://<host>:8138/app/`, admin at `:8150`. Register the installation in Admin → Licence to receive the perpetual Community licence (3 users, 15 runners). Update with `git pull && docker compose pull && docker compose up -d`. Licence: [LICENSE.md](LICENSE.md).
+
+## Центральный коннектор
+
+Единственный коннектор установки запускается внутри контейнера и сопрягается с вашей организацией сам. Git-провайдеры и токены — в `connector/connector.yaml`; после правки: `docker compose exec buff supervisorctl restart services:connector`. Подробнее — в [документации](https://buff.systems/docs/self-hosted/community).

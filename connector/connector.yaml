@@ -1,0 +1,17 @@
+# Центральный коннектор Buff Community Edition — единственный коннектор установки.
+# Он запускается внутри контейнера, сам сопрягается с вашей организацией при первом
+# старте и связывает ваш git и интеграции с платформой. Изменили файл — перезапустите:
+#   docker compose exec buff supervisorctl restart services:connector
+#
+# Реле установки изнутри контейнера; менять не нужно.
+middleware_url: ws://127.0.0.1:8138/nats
+state_dir: /data/connector/state
+
+# Git-провайдеры, к которым коннектор ходит по вашему токену (токен остаётся здесь).
+# kind: github | ghe | gitlab | gitea | bitbucket | bitbucket-dc; base_url — адрес вашего сервера.
+# Токен — из переменной окружения контейнера (token_env) или из файла (token_file).
+providers: []
+#  - kind: gitlab
+#    base_url: https://gitlab.example.com
+#    token_file: /data/connector/gitlab.token
+#    repos: [group/project]

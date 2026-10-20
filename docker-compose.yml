@@ -137,6 +137,8 @@ services:
       - buff-docker:/var/lib/docker
       - mw-config:/data/middleware/config
       - gitea-tokens:/data/gitea-tokens:ro
+      # Центральный коннектор (#617): его настройки и состояние — рядом с compose, чтобы править без входа в контейнер.
+      - ./connector:/data/connector
     depends_on:
       db: { condition: service_healthy }
       gitea: { condition: service_started }

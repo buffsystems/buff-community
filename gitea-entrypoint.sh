@@ -3,7 +3,7 @@
 # поднимается, создаём администратора установки и выпускаем два токена (полный и только
 # чтение) в общий том /buff-tokens — их читает наш контейнер. Повтор — ничего не делает.
 set -eu
-/usr/bin/entrypoint /bin/s6-svscan /etc/s6 &
+/usr/bin/entrypoint /usr/bin/s6-svscan /etc/s6 &
 PID=$!
 ADMIN="${GITEA_ADMIN_USER:-wmadmin}"
 i=0

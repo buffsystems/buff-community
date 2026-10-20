@@ -111,13 +111,13 @@ $D run --rm --runtime=sysbox-runc alpine:3.20 true >/dev/null && say "Sysbox р�
 fetch_image() {
   local image="$1" version="$2" base="$3" dir="$HERE/images" file="buff-community.tar.zst"
   if sudo docker image inspect "$image" >/dev/null 2>&1; then say "образ $image уже в docker"; return 0; fi
-  [ -n "$version" ] || die "образа $image нет в docker, а BUFF_VERSION в .env пуст — нечего скачивать"
   command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
   mkdir -p "$dir"
   # Файл уже лежит в images/ (перенесён носителем, закрытый контур) — скачивание не нужно.
   if [ -s "$dir/$file" ] && [ -s "$dir/$file.sha256" ]; then
     say "образ из $dir/$file (скачивание пропущено)"
   else
+    [ -n "$version" ] || die "образа $image нет ни в docker, ни в $dir, а BUFF_VERSION в .env пуст — нечего скачивать"
     say "скачиваю образ $version с $base"
     curl -fL --retry 3 -o "$dir/$file" "$base/$version/$file"
     curl -fL --retry 3 -o "$dir/$file.sha256" "$base/$version/$file.sha256"

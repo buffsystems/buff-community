@@ -7,12 +7,12 @@
 - **Программа** — сборка Buff Community Edition: образы, файлы установки, сценарии и документация, распространяемые buff.systems под этой лицензией.
 - **Лицензиар** — buff.systems.
 - **Организация** — юридическое лицо, индивидуальный предприниматель или физическое лицо, установившее Программу.
-- **Внутреннее использование** — применение Программы сотрудниками и подрядчиками Организации для нужд самой Организации.
+- **Внутреннее использование** — применение Программы сотрудниками и подрядчиками Организации (подрядчиками — по её заданию и исключительно для её нужд) для нужд самой Организации. Аффилированные с Организацией лица считаются отдельными Организациями: у каждой своя установка и своя Лицензия.
 - **Лицензия** — выданное Лицензиаром при регистрации Программы подписанное разрешение с пределами использования.
 
 ## 2. Что разрешено
 
-Лицензиар бесплатно предоставляет Организации неисключительное, непередаваемое, отзываемое право:
+Программа предоставляется в объектной (собранной, минифицированной) форме, без исходных текстов. Лицензиар бесплатно предоставляет Организации неисключительное, непередаваемое, отзываемое право:
 
 1. установить Программу на инфраструктуре Организации;
 2. использовать её для Внутреннего использования одной Организации;
@@ -28,7 +28,7 @@
 2. оказывать с помощью Программы услуги третьим лицам, в том числе как управляемый сервис (managed service), хостинг или аутсорсинг разработки, если иное не согласовано с Лицензиаром письменно;
 3. обходить, отключать или изменять проверку Лицензии, её пределы или механизм регистрации;
 4. удалять или скрывать обозначения авторства и уведомления о правах;
-5. изучать внутреннее устройство Программы способом, нарушающим применимое право, декомпилировать или дизассемблировать её, кроме случаев, прямо разрешённых законом;
+5. изучать внутреннее устройство Программы, декомпилировать или дизассемблировать её, за исключением случаев, прямо разрешённых применимым правом её, кроме случаев, прямо разрешённых законом;
 6. использовать Программу для создания конкурирующего продукта.
 
 Коммерческая Организация вправе использовать Программу для собственных нужд: запрет касается оказания услуг и передачи Программы другим, а не характера деятельности Организации.
@@ -52,7 +52,16 @@
 
 Нарушение настоящей лицензии прекращает её действие автоматически. Организация обязана прекратить использование Программы; данные Организации остаются у неё.
 
-## 8. Применимое право
+## 8. Обновления и изменение условий
+Новые версии Программы могут выпускаться на изменённых условиях; к установленной версии применяется текст лицензии, с которым она была получена. Установка новой версии означает принятие её условий.
+
+## 9. Товарные знаки
+Настоящая лицензия не передаёт прав на товарные знаки, названия и логотипы Лицензиара (в том числе «Buff», «Buff Development», «buff.systems»); они могут использоваться только для указания происхождения Программы.
+
+## 10. Делимость
+Если какое-либо условие настоящей лицензии будет признано недействительным, остальные условия сохраняют силу.
+
+## 11. Применимое право
 
 К настоящей лицензии применяется право Российской Федерации. Споры рассматриваются по месту нахождения Лицензиара.
 
@@ -64,7 +73,7 @@
 
 **1. Definitions.** *Software* — the Buff Community Edition build: images, installation files, scripts and documentation distributed by buff.systems under this licence. *Licensor* — buff.systems. *Organisation* — the legal entity, sole proprietor or natural person that installed the Software. *Internal Use* — use of the Software by the Organisation's employees and contractors for the Organisation's own needs. *Licence* — the signed permission with usage limits issued by the Licensor at registration.
 
-**2. Grant.** The Licensor grants the Organisation, free of charge, a non-exclusive, non-transferable, revocable right to install the Software on the Organisation's infrastructure, use it for Internal Use of one Organisation, and use it within the limits recorded in the Licence (users, concurrent runners, organisations). Code and documents the Software produces for the Organisation belong to the Organisation.
+**2. Grant.** The Software is provided in object (built, minified) form without source. The Licensor grants the Organisation, free of charge, a non-exclusive, non-transferable, revocable right to install the Software on the Organisation's infrastructure, use it for Internal Use of one Organisation, and use it within the limits recorded in the Licence (users, concurrent runners, organisations). Code and documents the Software produces for the Organisation belong to the Organisation.
 
 **3. Restrictions.** The Organisation shall not: (1) sell, rent, sublicense or otherwise transfer the Software or access to it to third parties; (2) provide services to third parties with the Software, including as a managed service, hosting or outsourced development, unless agreed with the Licensor in writing; (3) circumvent, disable or alter the Licence check, its limits or the registration mechanism; (4) remove or hide authorship and rights notices; (5) reverse engineer, decompile or disassemble the Software except as expressly permitted by law; (6) use the Software to build a competing product. A commercial Organisation may use the Software for its own needs: the restriction concerns providing services and transferring the Software to others, not the nature of the Organisation's business.
 
@@ -76,4 +85,4 @@
 
 **7. Termination.** A breach terminates this licence automatically; the Organisation must stop using the Software and keeps its data.
 
-**8. Governing law.** The law of the Russian Federation applies; disputes are resolved at the Licensor's seat.
+**8. Updates.** New versions may be released on changed terms; the installed version keeps the terms it came with. **9. Trademarks.** No rights to the Licensor's marks and names (including "Buff", "Buff Development", "buff.systems") are granted beyond identifying the Software. **10. Severability.** An invalid term does not affect the rest. **11. Governing law.** The law of the Russian Federation applies; disputes are resolved at the Licensor's seat.

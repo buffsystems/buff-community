@@ -25,6 +25,14 @@
 
 Проверка зависимостей npm (frontend, admin, middleware, auth-worker, ui, common-lib) от 20.10.2026: GPL/AGPL/SSPL — **нет**; MPL-2.0 — `web-push` (runtime, auth-worker), `lightningcss` (только сборка, в образ не попадает), `axe-core` (только тесты). Python: `psycopg` LGPL-3.0, `cryptography` Apache-2.0/BSD.
 
+## Центральный коннектор (внутри образа, #617)
+
+Агент коннектора написан на Go; его модули и лицензии: `github.com/nats-io/nats.go`, `nats-io/nkeys`, `nats-io/nuid` — Apache-2.0; `github.com/klauspost/compress` — BSD-3-Clause (с частями под Apache-2.0 и MIT); `golang.org/x/crypto`, `x/net`, `x/sys`, `x/term`, `x/text` — BSD-3-Clause; `gopkg.in/yaml.v3` — MIT и Apache-2.0; `gopkg.in/check.v1` — BSD-2-Clause (только тесты, в бинарник не входит). Плагины интеграций (Python) ставятся из каталога на сайте под своими манифестами; их зависимости — в каждом бандле.
+
+## Системные пакеты образа
+
+Образ собран от образа Windmill (Debian). Системные пакеты Debian (ОС, библиотеки, `git`, `git-lfs`, `supervisor`, `python3`, `iptables`, Docker Engine внутри образа) распространяются под своими лицензиями, включая GPL/LGPL; они используются как есть, без изменений, их исходные тексты доступны в Debian и у авторов (Docker — Apache-2.0). Наш код в образе — отдельные файлы и процессы, не производные от этих пакетов.
+
 ## Инструменты на хосте, которые ставит `install.sh`
 
 | Компонент | Лицензия |

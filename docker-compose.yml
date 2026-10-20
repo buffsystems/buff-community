@@ -1,0 +1,156 @@
+# Buff Community Edition (#606, эпик #600). Стоковые образы рядом с одним нашим:
+#   db       — PostgreSQL (все базы установки)
+#   gitea    — внутреннее git-хранилище (пользователю не видно)
+#   windmill — сервер оркестратора (его воркеры — внутри нашего контейнера)
+#   nats     — шина между браузером и сервисами (конфиг пишет наш контейнер)
+#   tika     — разбор документов для инструментов модели
+#   buff     — наши сервисы одним системным контейнером под Sysbox (внутри — свой dockerd
+#              для раннеров инструментов разработки и песочниц агентов)
+# Значения — в .env (см. .env.example; install.sh создаёт его с паролями).
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "20m", max-file: "10", compress: "true" }
+
+services:
+  db:
+    image: postgres:16
+    logging: *logging
+    command: ["postgres", "-c", "max_connections=500", "-c", "shared_buffers=512MB"]
+    environment:
+      POSTGRES_PASSWORD: "${PG_PASSWORD:?задайте PG_PASSWORD в .env}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  gitea:
+    image: gitea/gitea:1.27.0
+    logging: *logging
+    entrypoint: ["/bin/sh", "/buff/gitea-entrypoint.sh"]
+    environment:
+      GITEA_ADMIN_USER: "${GITEA_ADMIN_USER:-wmadmin}"
+      GITEA_ADMIN_PASSWORD: "${GITEA_ADMIN_PASSWORD:?задайте GITEA_ADMIN_PASSWORD в .env}"
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: "db:5432"
+      GITEA__database__NAME: gitea
+      GITEA__database__USER: gitea
+      GITEA__database__PASSWD: "${PG_PASSWORD}"
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__server__ROOT_URL: "http://gitea:3000/"
+      GITEA__server__DOMAIN: gitea
+      GITEA__server__DISABLE_SSH: "true"
+      GITEA__server__LFS_START_SERVER: "true"
+      GITEA__cron_0x2E_gc_lfs__ENABLED: "true"
+      GITEA__cron_0x2E_gc_lfs__SCHEDULE: "@every 24h"
+      GITEA__cron_0x2E_gc_lfs__OLDER_THAN: "168h"
+      GITEA__cron_0x2E_gc_lfs__PROPORTION_TO_CHECK_PER_REPO: "1"
+      GITEA__service__DISABLE_REGISTRATION: "true"
+      GITEA__service__REQUIRE_SIGNIN_VIEW: "false"
+      GITEA__service__DEFAULT_ENABLE_DEPENDENCIES: "true"
+      GITEA__service__ALLOW_CROSS_REPOSITORY_DEPENDENCIES: "true"
+      GITEA__repository__DEFAULT_CLOSE_ISSUES_VIA_COMMITS_IN_ANY_BRANCH: "false"
+      GITEA__repository.upload__FILE_MAX_SIZE: "250"
+      GITEA__attachment__MAX_SIZE: "250"
+      GITEA__webhook__ALLOWED_HOST_LIST: private
+      GITEA__migrations__ALLOW_LOCALNETWORKS: "true"
+    volumes:
+      - gitea-data:/data
+      - gitea-tokens:/buff-tokens
+      - ./gitea-entrypoint.sh:/buff/gitea-entrypoint.sh:ro
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+
+  windmill:
+    image: "${WINDMILL_IMAGE:-ghcr.io/windmill-labs/windmill@sha256:7f67f25ebc8d4f39563bfc0cf3346e9c34e772e5f4eb5caccd8ef713fb11b5bf}"
+    logging: *logging
+    environment:
+      DATABASE_URL: "postgres://windmill:${PG_PASSWORD}@db:5432/windmill"
+      MODE: server
+      BASE_URL: "http://windmill:8000"
+      BASE_INTERNAL_URL: "http://windmill:8000"
+      ZOMBIE_JOB_TIMEOUT: "3600"
+      FLOW_ZOMBIE_TRANSITION_TIMEOUT: "3600"
+    volumes:
+      - windmill-logs:/tmp/windmill/logs
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+
+  nats:
+    image: nats:2.10-alpine
+    logging: *logging
+    # Конфиг шины пишет наш контейнер при первом старте (ключи callout, аккаунты организаций);
+    # до его появления сервер ждёт. Дальше — тот же обёртка-вход, что у middleware.
+    command: ["sh", "-c", "while [ ! -s /config/nats-server.conf ] || [ ! -s /config/scripts/nats-entrypoint.sh ]; do sleep 2; done; exec sh /config/scripts/nats-entrypoint.sh"]
+    environment:
+      NATS_CONF: /config/nats-server.conf
+    volumes:
+      - mw-config:/config
+      - nats-data:/data
+    restart: unless-stopped
+
+  tika:
+    image: "${TIKA_IMAGE:-apache/tika@sha256:80072bb73dd320a9de9709beb0b16d14dd6d2680376f8d31e498f55b633ba593}"
+    logging: *logging
+    read_only: true
+    tmpfs: ["/tmp:size=512m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    restart: unless-stopped
+
+  buff:
+    image: "${BUFF_IMAGE:?задайте BUFF_IMAGE в .env}"
+    logging: *logging
+    runtime: sysbox-runc
+    hostname: buff
+    environment:
+      EDITION: community
+      PG_PASSWORD: "${PG_PASSWORD}"
+      GITEA_ADMIN_USER: "${GITEA_ADMIN_USER:-wmadmin}"
+      GITEA_ADMIN_PASSWORD: "${GITEA_ADMIN_PASSWORD}"
+      WM_ADMIN_PASSWORD: "${WM_ADMIN_PASSWORD:?задайте WM_ADMIN_PASSWORD в .env}"
+      APP_URL: "${APP_URL:?задайте APP_URL в .env — адрес, по которому люди откроют приложение}"
+      ORG: "${ORG:?задайте ORG в .env — имя вашей организации (латиницей)}"
+      ADMIN_USER: "${ADMIN_USER:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?задайте ADMIN_PASSWORD в .env}"
+      ADMIN_EMAIL: "${ADMIN_EMAIL:?задайте ADMIN_EMAIL в .env}"
+      RUNNERS: "${RUNNERS:-3}"
+      LLM_BASE_URL: "${LLM_BASE_URL:-https://openrouter.ai/api/v1}"
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+      LLM_MODEL: "${LLM_MODEL:-}"
+      LICENSE_RELAY_URL: "${LICENSE_RELAY_URL:-wss://ide.buff.systems/nats}"
+      AGENT_IMAGE: "${BUFF_IMAGE}"
+      AGENT_IMAGE_PULL: "${AGENT_IMAGE_PULL:-1}"
+    ports:
+      - "${BIND_IP:-0.0.0.0}:${APP_PORT:-8138}:8138"
+      - "${BIND_IP:-0.0.0.0}:${ADMIN_PORT:-8150}:8150"
+    volumes:
+      - buff-data:/data
+      - buff-docker:/var/lib/docker
+      - mw-config:/data/middleware/config
+      - gitea-tokens:/data/gitea-tokens:ro
+    depends_on:
+      db: { condition: service_healthy }
+      gitea: { condition: service_started }
+      windmill: { condition: service_started }
+      nats: { condition: service_started }
+      tika: { condition: service_started }
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  gitea-data:
+  gitea-tokens:
+  windmill-logs:
+  mw-config:
+  nats-data:
+  buff-data:
+  buff-docker:

@@ -104,11 +104,30 @@ D="sudo docker"
 say "проверяю Sysbox живым контейнером"
 $D run --rm --runtime=sysbox-runc alpine:3.20 true >/dev/null && say "Sysbox работает"
 
-# ---- 6. Сборка -------------------------------------------------------------------------------
+# ---- 6. Настройки установки (.env) -----------------------------------------------------------
+# Первый запуск: .env из .env.example, пароли служб и первого администратора — случайные,
+# адрес приложения — по адресу этой машины. Повтор .env не трогает.
+if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
+  say "создаю .env"
+  rand() { head -c 48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c "$1"; }
+  ip="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -1)"
+  cp "$HERE/.env.example" "$HERE/.env"
+  put() { sed -i "s#^$1=.*#$1=$2#" "$HERE/.env"; }
+  put APP_URL "http://${ip:-127.0.0.1}:8138"
+  put ADMIN_EMAIL "admin@${ip:-localhost}"
+  put ADMIN_PASSWORD "$(rand 20)"
+  put PG_PASSWORD "$(rand 32)"
+  put GITEA_ADMIN_PASSWORD "$(rand 24)"
+  put WM_ADMIN_PASSWORD "$(rand 24)"
+  chmod 600 "$HERE/.env"
+  say "пароли записаны в $HERE/.env (пароль администратора — ADMIN_PASSWORD); впишите ORG, LLM_* и при необходимости APP_URL"
+fi
+
+# ---- 7. Сборка -------------------------------------------------------------------------------
 if [ -f "$HERE/docker-compose.yml" ]; then
-  say "поднимаю сборку: docker compose pull && up -d"
-  (cd "$HERE" && $D compose pull && $D compose up -d)
-  say "готово — откройте приложение, первый вход описан в README"
+  say "поднимаю сборку: docker compose up -d"
+  (cd "$HERE" && $D compose up -d)
+  say "готово — приложение: $(grep ^APP_URL= "$HERE/.env" | cut -d= -f2-), админка — порт 8150; первый старт занимает несколько минут: docker compose logs -f buff"
 else
   say "docker-compose.yml рядом нет — хост подготовлен, сборка поднимается отдельно"
 fi

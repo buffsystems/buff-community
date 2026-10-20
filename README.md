@@ -12,7 +12,7 @@
 ## Установка
 
 ```sh
-git clone https://github.com/buff-systems/buff-community.git
+git clone https://github.com/buffsystems/buff-community.git
 cd buff-community
 ./install.sh
 ```

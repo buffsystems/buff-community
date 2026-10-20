@@ -139,6 +139,8 @@ services:
       - gitea-tokens:/data/gitea-tokens:ro
       # Центральный коннектор (#617): его настройки и состояние — рядом с compose, чтобы править без входа в контейнер.
       - ./connector:/data/connector
+      # Образ установки, скачанный install.sh (#619): отсюда внутренний docker берёт образ песочниц.
+      - ./images:/images:ro
     depends_on:
       db: { condition: service_healthy }
       gitea: { condition: service_started }

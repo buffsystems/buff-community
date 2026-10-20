@@ -3,3 +3,5 @@ dist/
 .env
 *.key
 *.lic
+images/*.tar.zst
+images/*.sha256

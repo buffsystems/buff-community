@@ -9,7 +9,8 @@
 #      даёт каждому контейнеру своё пространство времени, Sysbox 0.7 его не знает), запас сетей.
 #   4. Сторож клина sysbox-fs раз в минуту (cron).
 #   5. Текущего пользователя — в группу docker.
-#   6. Если рядом лежит docker-compose.yml — `docker compose pull && up -d`.
+#   6. Образ выпуска — с buff.systems (BUFF_VERSION из .env), без реестра.
+#   7. Если рядом лежит docker-compose.yml — `docker compose up -d`.
 #
 # Запуск: обычным пользователем с sudo (не под root):  ./install.sh
 # Требования: Ubuntu 22.04/24.04 (amd64), ядро ≥ 5.7, выделенная ВМ (не Docker Desktop).
@@ -104,7 +105,25 @@ D="sudo docker"
 say "проверяю Sysbox живым контейнером"
 $D run --rm --runtime=sysbox-runc alpine:3.20 true >/dev/null && say "Sysbox работает"
 
-# ---- 6. Настройки установки (.env) -----------------------------------------------------------
+# ---- 6. Образ установки — с нашего сайта (#619) ----------------------------------------------
+# Реестра у заказчика нет: образ выпуска лежит на buff.systems как файл. Нужная версия —
+# BUFF_VERSION в .env (пин выпуска); пусто — образ должен быть загружен в docker заранее.
+fetch_image() {
+  local image="$1" version="$2" base="$3" dir="$HERE/images" file="buff-community.tar.zst"
+  if sudo docker image inspect "$image" >/dev/null 2>&1; then say "образ $image уже в docker"; return 0; fi
+  [ -n "$version" ] || die "образа $image нет в docker, а BUFF_VERSION в .env пуст — нечего скачивать"
+  command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
+  mkdir -p "$dir"
+  say "скачиваю образ $version с $base"
+  curl -fL --retry 3 -o "$dir/$file" "$base/$version/$file"
+  curl -fL --retry 3 -o "$dir/$file.sha256" "$base/$version/$file.sha256"
+  (cd "$dir" && sha256sum -c --quiet "$file.sha256") || die "образ не сходится с контрольной суммой"
+  say "загружаю образ в docker"
+  zstd -dc "$dir/$file" | sudo docker load >/dev/null
+  sudo docker image inspect "$image" >/dev/null 2>&1 || die "после загрузки образа $image в docker нет — проверьте BUFF_IMAGE"
+}
+
+# ---- 7. Настройки установки (.env) -----------------------------------------------------------
 # Первый запуск: .env из .env.example, пароли служб и первого администратора — случайные,
 # адрес приложения — по адресу этой машины. Повтор .env не трогает.
 if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
@@ -125,6 +144,8 @@ fi
 
 # ---- 7. Сборка -------------------------------------------------------------------------------
 if [ -f "$HERE/docker-compose.yml" ]; then
+  envget() { grep "^$1=" "$HERE/.env" | head -1 | cut -d= -f2-; }
+  fetch_image "$(envget BUFF_IMAGE)" "$(envget BUFF_VERSION)" "$(envget BUFF_DOWNLOADS)"
   say "поднимаю сборку: docker compose up -d"
   (cd "$HERE" && $D compose up -d)
   say "готово — приложение: $(grep ^APP_URL= "$HERE/.env" | cut -d= -f2-), админка — порт 8150; первый старт занимает несколько минут: docker compose logs -f buff"

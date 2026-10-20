@@ -12,7 +12,7 @@ until wget -q -O- http://127.0.0.1:3000/api/healthz >/dev/null 2>&1; do
   sleep 2
 done
 if ! su git -c "gitea admin user list --admin" | awk 'NR>1 {print $2}' | grep -qx "$ADMIN"; then
-  su git -c "gitea admin user create --admin --username '$ADMIN' --email 'admin@buff.local' --password '$GITEA_ADMIN_PASSWORD' --must-change-password=false"
+  su git -c "gitea admin user create --admin --username '$ADMIN' --email 'wmadmin@localhost' --password '$GITEA_ADMIN_PASSWORD' --must-change-password=false"
 fi
 mkdir -p /buff-tokens
 issue() { # файл, области

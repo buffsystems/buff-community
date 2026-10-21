@@ -92,6 +92,8 @@ services:
     deploy:
       replicas: ${RUNNERS:-3}
     environment:
+      # Версия комплекта: смена пересоздаёт воркеры — их кеш бандлов флоу не переживает новый образ сервисов.
+      BUFF_VERSION: "${BUFF_VERSION:-dev}"
       DATABASE_URL: "postgres://windmill:${PG_PASSWORD}@db:5432/windmill"
       MODE: worker
       WORKER_GROUP: default

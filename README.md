@@ -1,20 +1,58 @@
-# Buff Community Edition
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo.svg" alt="Buff Development" width="420">
+  </picture>
+</p>
 
-*[English version](README.en.md)*
+<p align="center">
+  <b>ИИ-разработчик, аналитик и база знаний для вашей компании — на вашей машине, с вашей моделью.</b><br>
+  Community Edition: бесплатно для внутреннего использования одной организацией.
+</p>
 
-Бесплатное издание [Buff](https://buff.systems) для внутреннего использования одной организацией: ИИ-разработка по задачам, «Спросить», глубокие исследования и база знаний — на вашей машине, с вашей моделью. Полная документация — [buff.systems/docs/self-hosted/community](https://buff.systems/docs/self-hosted/community); чем Community отличается от SaaS и Enterprise — на странице [Издания](https://buff.systems/docs/self-hosted). Лицензия — [LICENSE.md](LICENSE.md).
+<p align="center">
+  <a href="https://github.com/buffsystems/buff-community/releases"><img alt="Выпуск" src="https://img.shields.io/github/v/release/buffsystems/buff-community?label=выпуск&color=2563eb"></a>
+  <a href="https://github.com/buffsystems/buff-community/pkgs/container/buff-community"><img alt="Образ" src="https://img.shields.io/badge/ghcr.io-buff--community-2563eb?logo=docker&logoColor=white"></a>
+  <a href="LICENSE.md"><img alt="Лицензия" src="https://img.shields.io/badge/лицензия-Buff%20Community-64748b"></a>
+  <a href="https://buff.systems/docs/self-hosted/community"><img alt="Документация" src="https://img.shields.io/badge/документация-buff.systems-0b0d12"></a>
+</p>
 
-## Что нужно
+<p align="center">
+  <a href="#установка-за-пять-минут">Установка</a> ·
+  <a href="docs/install.md">Подробный гайд</a> ·
+  <a href="#как-это-работает">Как это работает</a> ·
+  <a href="#видео">Видео</a> ·
+  <a href="https://buff.systems/docs/self-hosted/community">Документация</a> ·
+  <a href="README.en.md">English</a>
+</p>
 
-| | Требование |
+---
+
+**Buff** превращает задачу в трекере в готовую ветку с тестами, отвечает на вопросы по документам компании и пишет глубокие исследования — силами ИИ-агентов, которые работают автономно, но под контролем человека. Community Edition ставится на вашу машину одной командой: код, задачи и документы не покидают её, модель — ваша (любой OpenAI-совместимый эндпоинт).
+
+<p align="center">
+  <img src="assets/shots/dev.png" alt="Разработка: задачи проекта, их этапы и статус агентов" width="880">
+</p>
+
+## Что умеет
+
+| | |
 |---|---|
-| Linux | Ubuntu 22.04 или 24.04 (amd64), ядро не ниже 5.7, пользователь с `sudo`, установленный `git`. Раннеры работают в [Sysbox](https://github.com/nestybox/sysbox) — без привилегированных контейнеров |
-| macOS, Windows | [Docker Desktop](https://docs.docker.com/desktop/); на Windows скрипт запускается из Git Bash. **Sysbox здесь нет, поэтому наш контейнер работает привилегированным** — подходит для личной машины, не для сервера |
-| Ресурсы | минимум 4 CPU и 8 ГБ памяти (одна разработка за раз); рекомендуется 8 CPU и 16 ГБ для трёх одновременных. На диске ~12 ГБ под образы (стоковые, наш и собранная песочница) плюс место под ваши репозитории: данные лежат в томах Docker, не в образе |
-| Интернет | образы с ghcr.io и Docker Hub, суточная проверка лицензии на buff.systems, ваш эндпоинт модели |
-| Модель | ключ к OpenAI-совместимому эндпоинту: [OpenRouter](https://openrouter.ai), свой LiteLLM, vLLM, Ollama и т. п. |
+| **Разработка по задачам** | Подключите репозиторий (GitHub, GitLab, Gitea, Bitbucket), опишите задачу — аналитик уточнит, разработчик реализует в изолированной песочнице, ревьюер проверит, тесты прогонятся. На выходе ветка и merge request. Вы утверждаете формулировку и результат. |
+| **«Спросить»** | Вопрос по документам, регламентам и коду — ответ с опорой на источники и ссылками. Только чтение, без изменений. Для любого отдела, не только для инженеров. |
+| **Глубокое исследование** | Два агента — аналитик и ревьюер — прорабатывают вопрос по вашим источникам и готовят выверенный документ: Markdown и PDF. |
+| **База знаний** | То, что команда выяснила, остаётся в организации: записи с источниками, которыми пользуются и люди, и агенты. |
+| **Buff Code** | Терминал для инженеров: та же организация, её модели и база знаний — из командной строки. Сессии видны в кабинете. |
+| **Коннектор** | Встроенный коннектор к вашим git-провайдерам и источникам знаний (Notion, Confluence, Google Docs и др.) — токены остаются на вашей машине. |
 
-## Установка
+<p align="center">
+  <img src="assets/shots/ask.png" alt="«Спросить»: ответ по документам компании с источниками" width="430">
+  <img src="assets/shots/research.png" alt="Глубокое исследование: документ аналитика после ревью" width="430">
+</p>
+
+## Установка за пять минут
+
+Нужны: Linux (Ubuntu 22.04/24.04, пользователь с `sudo`) или Docker Desktop на macOS/Windows; 4 CPU и 8 ГБ памяти; ключ к OpenAI-совместимому эндпоинту модели (OpenRouter, LiteLLM, vLLM, Ollama…). Подробные требования — в [гайде](docs/install.md#что-нужно).
 
 ```sh
 git clone https://github.com/buffsystems/buff-community.git
@@ -22,50 +60,55 @@ cd buff-community
 ./install.sh
 ```
 
-Скрипт сам определяет режим. На Linux он ставит Docker и Sysbox; с Docker Desktop — использует его и добавляет `docker-compose.desktop.yml` (привилегированный режим). Дальше в обоих случаях: создаёт `.env` со случайными паролями, скачивает образ издания, поднимает `docker compose` и показывает ход первого старта прямо в терминале — до строки «готово» (несколько минут: базы, учётные записи, выкладка пайплайна). Запускайте обычным пользователем, root не нужен.
+Скрипт спросит имя организации, почту администратора и адрес модели, поставит Docker (и Sysbox на Linux), скачает образ, соберёт песочницу агента и покажет ход первого старта прямо в терминале — до строки **готово**. Дальше:
 
-До первого входа откройте `.env` и впишите:
+- приложение — `http://<машина>:8138/app/`, логин `admin`, пароль — `ADMIN_PASSWORD` из `.env`;
+- админка — `http://<машина>:8150`: пользователи, модель, воркеры, лицензия;
+- лицензия — в админке «Лицензия» укажите организацию и почту: установка зарегистрируется на buff.systems и получит бессрочную лицензию Community (3 пользователя, 15 одновременных разработок, одна организация).
 
-| Переменная | Что это |
-|---|---|
-| `ORG` | имя вашей организации латиницей (`acme`) |
-| `ADMIN_USER`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | первый пользователь приложения и администратор (пароль сгенерирован) |
-| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | эндпоинт, ключ и модель, например `https://openrouter.ai/api/v1`, `sk-or-…`, `openai/gpt-4.1` |
-| `APP_URL` | адрес, по которому люди откроют приложение (по умолчанию — IP машины, порт 8138) |
-| `RUNNERS` | сколько воркеров разработки запустить — столько разработок пойдут одновременно (по умолчанию 3, каждая — до 1,5 ГБ памяти). Выше предела лицензии значение не действует: предел подписан в лицензии и виден в админке → «Лицензия» (Community — 15) |
+Обновление: `git pull && ./install.sh`. Снести: `docker compose down -v`. Остальное — в [подробном гайде](docs/install.md): настройка `.env`, коннектор к git-провайдерам, резервная копия, диагностика, Docker Desktop — со скриншотами.
 
-Изменили `.env` — `docker compose up -d` применит.
+## Как это работает
 
-## Первый вход
-
-- Приложение: `APP_URL` (`http://<машина>:8138/app/`), логин `ADMIN_USER` с паролем из `.env`.
-- Админка: `http://<машина>:8150`, пользователь `admin`, тот же пароль. Разделы: пользователи (новых заводит администратор), конфигурация модели, воркеры, лицензия.
-- Лицензия: в админке → «Лицензия» укажите организацию и почту, подтвердите согласие на обработку этих данных — инсталляция зарегистрируется на buff.systems при ближайшей проверке и получит бессрочную лицензию Community: 3 пользователя, 15 одновременных разработок, одна организация. Пределы видны там же. Без лицензии новые задачи не стартуют, вход и чтение работают.
-
-## Обновление
-
-```sh
-git pull
-./install.sh
+```
+ браузер ──▶ frontend ──▶ middleware (NATS) ◀──long-poll── сервисы Buff ──▶ Gitea · Postgres · Windmill
+                                                           │
+                                            воркеры Windmill ──▶ песочницы агентов (внутренний docker)
+                                                           │
+                                            ваша модель (OpenAI-совместимый API) · ваши git-провайдеры
 ```
 
-Впишите в `.env` новый `BUFF_IMAGE` из обновлённого `.env.example` — скрипт скачает образ и перезапустит контейнеры. Миграции базы применяются при старте. Данные — в томах `pgdata`, `gitea-data`, `buff-data`, `buff-docker`: бэкап = `docker compose stop` + копия томов.
+- **Один наш образ** `ghcr.io/buffsystems/buff-community` (~1,4 ГБ): все сервисы Buff под супервизором и внутренний docker для песочниц. На Linux — системный контейнер Sysbox, без `privileged`; на Docker Desktop — привилегированный.
+- **Стоковые образы** PostgreSQL, Gitea (внутреннее git-хранилище), NATS, Windmill (оркестратор и его воркеры), Apache Tika — из их реестров, на условиях авторов.
+- **Песочница агента** — образ `buff-community-sandbox`, который `install.sh` собирает на вашей машине поверх Windmill (все языковые рантаймы, как в SaaS). Каждый прогон идёт в своём контейнере во внутренней сети: наружу — только через посредника с ключом прогона, к модели и git — по вашим адресам.
+- **Ничего не уходит наружу**, кроме запросов к вашей модели, ваших git-провайдеров и суточной проверки лицензии на buff.systems (четыре поля: идентификатор установки, версия, число пользователей и раннеров).
 
-## Диагностика
+## Видео
 
-- `docker compose ps`, `docker compose logs buff` — наш контейнер держит сервисы под супервизором: `docker compose exec buff supervisorctl status`.
-- Повторить первый старт безопасно: `docker compose exec buff buff-bootstrap`.
-- Снести установку целиком: `docker compose down -v` (тома с данными удаляются) и `sudo rm -rf` каталога комплекта — `connector/state` пишет контейнер от root.
-- Вопросы и ошибки — в [issues](https://github.com/buffsystems/buff-community/issues) этого репозитория; как их оформлять — в [CONTRIBUTING.md](CONTRIBUTING.md). Поддержка Community Edition не предоставляется.
+Ролики о продукте — в [выпуске v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1) (mp4, со звуком):
 
-## Центральный коннектор
+| [Buff за две минуты](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/buff-promo-16x9.mp4) | [Разработка по задачам](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/development-16x9.mp4) | [Вопросы и база знаний](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/knowledge-16x9.mp4) | [Buff Code](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/buffcode-16x9.mp4) |
+|---|---|---|---|
 
-Единственный коннектор установки запускается внутри контейнера и сопрягается с вашей организацией сам. Git-провайдеры и токены — в `connector/connector.yaml`; после правки: `docker compose exec buff supervisorctl restart services:connector`. Подробнее — в [документации](https://buff.systems/docs/self-hosted/community#центральный-коннектор).
+<p align="center">
+  <img src="assets/shots/knowledge.png" alt="База знаний организации" width="430">
+  <img src="assets/shots/home.png" alt="Проект: репозиторий, задачи, аудиты" width="430">
+</p>
 
-## Состав
+## Издания
 
-Стоковые образы PostgreSQL, Gitea, NATS, Windmill (сервер и воркеры), Apache Tika и один наш образ `buff-community` (~1,4 ГБ) со всеми сервисами Buff — Windmill в него не входит. Песочница агента — отдельный образ `buff-community-sandbox`, который `install.sh` собирает на вашей машине поверх того же стокового Windmill (все рантаймы, как у SaaS) и передаёт во внутренний docker без второго скачивания; мы его не распространяем. Сторонние лицензии — [THIRD-PARTY.md](THIRD-PARTY.md).
+| | Community | Enterprise on-premise | SaaS |
+|---|---|---|---|
+| Где работает | ваша машина | ваш контур | buff.systems |
+| Организации · пользователи · разработки | 1 · 3 · 15 | без ограничений | без ограничений |
+| Единый вход, аудит, поддержка | — | да | да |
+| Модель | ваша | ваша | наша или ваша |
+| Цена | бесплатно | лицензия на организацию | за токены |
 
-## Участие
+Подробнее — [Издания](https://buff.systems/docs/self-hosted) и [тарифы](https://buff.systems/pricing).
 
-Правки установки, документации и переводов, сообщения об ошибках — см. [CONTRIBUTING.md](CONTRIBUTING.md), включая правила для изменений, сделанных с помощью ИИ.
+## Участие и лицензия
+
+Этот репозиторий — установочный комплект: `install.sh`, `docker-compose.yml`, настройки коннектора, документация. Правки комплекта, переводы и сообщения об ошибках — через [issues](https://github.com/buffsystems/buff-community/issues) и pull request, правила — в [CONTRIBUTING.md](CONTRIBUTING.md) (включая работу с ИИ-помощниками). Исходный код сервисов поставляется образом и не открыт.
+
+Лицензия — [Buff Community Edition](LICENSE.md): внутреннее использование одной организацией, без перепродажи и услуг третьим лицам. Сторонние компоненты — [THIRD-PARTY.md](THIRD-PARTY.md).

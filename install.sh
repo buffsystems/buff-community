@@ -156,7 +156,8 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   cp "$HERE/.env.example" "$HERE/.env"
   put() { sed -i.bak "s#^$1=.*#$1=$2#" "$HERE/.env" && rm -f "$HERE/.env.bak"; }
   put APP_URL "http://${ip:-127.0.0.1}:8138"
-  put ADMIN_EMAIL "admin@${ip:-localhost}"
+  # Почта администратора нужна внутреннему git-серверу настоящей: «admin@localhost» он отвергает.
+  [ -z "$ip" ] || put ADMIN_EMAIL "admin@${ip}"
   put ADMIN_PASSWORD "$(rand 20)"
   put PG_PASSWORD "$(rand 32)"
   put GITEA_ADMIN_PASSWORD "$(rand 24)"
@@ -175,6 +176,7 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   }
   say "настройки установки (Enter — оставить как есть, поправить можно потом в .env)"
   ask ORG "имя вашей организации латиницей"
+  ask ADMIN_EMAIL "почта администратора"
   ask LLM_BASE_URL "адрес OpenAI-совместимого эндпоинта модели"
   ask LLM_API_KEY "ключ эндпоинта (ввод скрыт)" silent
   ask LLM_MODEL "модель, например openai/gpt-4.1"

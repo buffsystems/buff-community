@@ -17,6 +17,14 @@ cd buff-community
 ./install.sh
 ```
 
+Пока издание не опубликовано, репозиторий и пакет образа на GitHub закрыты: клонируйте с токеном GitHub, у которого есть `repo` и `read:packages`, и передайте тот же токен скрипту — он войдёт в ghcr.io и сохранит образ файлом в `images/` для внутреннего докера песочниц:
+
+```sh
+git clone https://<токен>@github.com/buffsystems/buff-community.git
+cd buff-community
+GHCR_TOKEN=<токен> ./install.sh
+```
+
 `install.sh` ставит Docker и [Sysbox](https://github.com/nestybox/sysbox) (в нём раннеры инструментов разработки работают без `privileged`), создаёт `.env` со случайными паролями и поднимает `docker compose`. Первый старт занимает несколько минут: следить — `docker compose logs -f buff`, готовность — строка `готово`.
 
 До первого входа откройте `.env` и впишите:

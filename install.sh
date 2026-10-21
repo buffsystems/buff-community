@@ -118,8 +118,20 @@ fetch_image() {
     say "загружаю образ из $dir/$file"
     zstd -dc "$dir/$file" | sudo docker load >/dev/null
   else
+    # Пока пакет на ghcr.io закрыт (до публикации, #608): GHCR_TOKEN=<токен> ./install.sh — вход
+    # на хосте, а для внутреннего докера песочниц, у которого входа нет, образ сохраняется файлом.
+    if [ -n "${GHCR_TOKEN:-}" ]; then
+      say "вход в ghcr.io под ${GHCR_USER:-buffsystems}"
+      printf '%s' "$GHCR_TOKEN" | sudo docker login ghcr.io -u "${GHCR_USER:-buffsystems}" --password-stdin >/dev/null || die "вход в ghcr.io не удался — проверьте GHCR_TOKEN"
+    fi
     say "скачиваю образ $image"
     sudo docker pull "$image" || die "образ $image не скачался — проверьте BUFF_IMAGE и доступ к ghcr.io"
+    if [ -n "${GHCR_TOKEN:-}" ]; then
+      command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
+      say "закрытый пакет: сохраняю образ в $dir для внутреннего докера песочниц"
+      sudo docker save "$image" | zstd -T0 -3 -q -o "$dir/$file" --force && (cd "$dir" && sha256sum "$file" > "$file.sha256")
+      sed -i 's#^AGENT_IMAGE_PULL=.*#AGENT_IMAGE_PULL=0#' "$HERE/.env"
+    fi
   fi
   sudo docker image inspect "$image" >/dev/null 2>&1 || die "после загрузки образа $image в docker нет — проверьте BUFF_IMAGE"
 }

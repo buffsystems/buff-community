@@ -205,6 +205,13 @@ follow_bootstrap() {
       kill "$lp" 2>/dev/null; tail -n 20 "$log" >&2; rm -f "$log"
       die "контейнер buff остановился (состояние: $state) — выше последние строки его журнала; полный: docker compose logs buff"
     fi
+    # Первый старт — программа bootstrap под супервизором: её выход без «готово» — провал.
+    if $D exec "$cid" supervisorctl status bootstrap 2>/dev/null | grep -qE 'EXITED|FATAL'; then
+      kill "$lp" 2>/dev/null
+      grep '\[bootstrap\]' "$log" | tail -n 5 | sed "s/.*\[bootstrap\]$(printf '\033')\[0m //; s/.*\[bootstrap\] //" >&2
+      rm -f "$log"
+      die "первый старт прервался — выше его последние строки; полный журнал: docker compose logs buff"
+    fi
     if [ $(($(date +%s) - started)) -ge "$BOOT_TIMEOUT" ]; then
       kill "$lp" 2>/dev/null; rm -f "$log"
       die "первый старт не завершился за $((BOOT_TIMEOUT / 60)) минут — смотрите docker compose logs buff"

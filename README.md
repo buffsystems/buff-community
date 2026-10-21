@@ -30,12 +30,9 @@
 
 **Buff** превращает задачу в трекере в готовую ветку с тестами, отвечает на вопросы по документам компании и пишет глубокие исследования — силами ИИ-агентов, которые работают автономно, но под контролем человека. Community Edition ставится на вашу машину одной командой: код, задачи и документы не покидают её, модель — ваша (любой OpenAI-совместимый эндпоинт).
 
-<p align="center">
-  <a href="https://buff.systems/video/development" title="Разработка по задачам — видео, 4:36, со звуком">
-    <img src="assets/video-development.jpg" alt="Видео: разработка по задачам (4:36). Нажмите, чтобы посмотреть со звуком" width="880">
-  </a>
-  <br><sub>Видео «Разработка по задачам», 4:36 — открывается на buff.systems со звуком</sub>
-</p>
+**Разработка по задачам** — 4:36, со звуком. Нажмите play:
+
+https://github.com/user-attachments/assets/32c45255-1b63-4d89-8dc4-956e112542cc
 
 ## Что умеет
 
@@ -88,10 +85,19 @@ cd buff-community
 
 ## Видео
 
-Четыре ролика со звуком — каждый открывается на buff.systems в плеере (файлы mp4 лежат в [выпуске v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1)):
+Ещё три ролика со звуком (файлы mp4 — во [вложениях выпуска v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1)):
 
-| [Buff за две минуты](https://buff.systems/video/buff) · 1:23 | [Разработка по задачам](https://buff.systems/video/development) · 4:36 | [Вопросы и база знаний](https://buff.systems/video/knowledge) · 2:40 | [Buff Code](https://buff.systems/video/buff-code) · 3:22 |
-|---|---|---|---|
+**Buff за две минуты** — 1:23
+
+https://github.com/user-attachments/assets/36d44fe2-071f-4b3c-86b0-2aad825b9b02
+
+**Вопросы и база знаний** — 2:40
+
+https://github.com/user-attachments/assets/d788e831-584d-4707-858d-f3956e9b24b1
+
+**Buff Code** — 3:22
+
+https://github.com/user-attachments/assets/481da974-11fa-495a-a660-3549f52888a2
 
 <p align="center">
   <img src="assets/shots/knowledge.png" alt="База знаний организации" width="430">

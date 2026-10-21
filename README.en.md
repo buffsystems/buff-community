@@ -30,12 +30,9 @@
 
 **Buff** turns a tracker task into a ready branch with tests, answers questions about your company's documents and writes deep research — with AI agents that work autonomously but under human control. The Community Edition installs on your own machine with one command: code, tasks and documents never leave it, the model is yours (any OpenAI-compatible endpoint).
 
-<p align="center">
-  <a href="https://buff.systems/video/development" title="Development by tasks — video, 4:36, with sound">
-    <img src="assets/video-development.jpg" alt="Video: development by tasks (4:36). Click to watch with sound" width="880">
-  </a>
-  <br><sub>Video «Development by tasks», 4:36, in Russian — opens on buff.systems with sound</sub>
-</p>
+**Development by tasks** — 4:36, with sound (in Russian). Press play:
+
+https://github.com/user-attachments/assets/32c45255-1b63-4d89-8dc4-956e112542cc
 
 ## What it does
 
@@ -88,10 +85,19 @@ Update: `git pull && ./install.sh`. Remove: `docker compose down -v`. Everything
 
 ## Videos
 
-Four videos with sound, in Russian — each opens in a player on buff.systems (the mp4 files are attached to [release v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1)):
+Three more videos with sound, in Russian (the mp4 files are attached to [release v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1)):
 
-| [Buff in two minutes](https://buff.systems/video/buff) · 1:23 | [Development by tasks](https://buff.systems/video/development) · 4:36 | [Questions and the knowledge base](https://buff.systems/video/knowledge) · 2:40 | [Buff Code](https://buff.systems/video/buff-code) · 3:22 |
-|---|---|---|---|
+**Buff in two minutes** — 1:23
+
+https://github.com/user-attachments/assets/36d44fe2-071f-4b3c-86b0-2aad825b9b02
+
+**Questions and the knowledge base** — 2:40
+
+https://github.com/user-attachments/assets/d788e831-584d-4707-858d-f3956e9b24b1
+
+**Buff Code** — 3:22
+
+https://github.com/user-attachments/assets/481da974-11fa-495a-a660-3549f52888a2
 
 <p align="center">
   <img src="assets/shots/knowledge.png" alt="The organisation's knowledge base" width="430">

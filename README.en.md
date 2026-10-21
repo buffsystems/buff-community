@@ -10,7 +10,7 @@ The free edition of [Buff](https://buff.systems) for the internal use of one org
 |---|---|
 | Linux | Ubuntu 22.04 or 24.04 (amd64), kernel 5.7 or newer, a user with `sudo`. Runners work inside [Sysbox](https://github.com/nestybox/sysbox) — no privileged containers |
 | macOS, Windows | [Docker Desktop](https://docs.docker.com/desktop/); on Windows run the script from Git Bash. **There is no Sysbox here, so our container runs privileged** — fine for a personal machine, not for a server |
-| Resources | at least 4 CPU and 8 GB RAM (one development at a time); 8 CPU and 16 GB recommended for three concurrent ones. About 20 GB of disk for images plus room for your repositories: data lives in Docker volumes, not in the image |
+| Resources | at least 4 CPU and 8 GB RAM (one development at a time); 8 CPU and 16 GB recommended for three concurrent ones. About 12 GB of disk for images (stock ones, ours and the locally built sandbox) plus room for your repositories: data lives in Docker volumes, not in the image |
 | Internet | images from ghcr.io and Docker Hub, the daily licence check at buff.systems, your model endpoint |
 | Model | a key to an OpenAI-compatible endpoint: [OpenRouter](https://openrouter.ai), your own LiteLLM, vLLM, Ollama, etc. |
 
@@ -63,7 +63,7 @@ The installation's only connector starts inside the container and pairs with you
 
 ## What is inside
 
-Stock images of PostgreSQL, Gitea, NATS, Windmill (server), Apache Tika and one image of ours, `buff-community`, with all Buff services. Third-party licences: [THIRD-PARTY.md](THIRD-PARTY.md). Windmill is downloaded from ghcr.io on its authors' terms and is not part of our image.
+Stock images of PostgreSQL, Gitea, NATS, Windmill (server and workers), Apache Tika and one image of ours, `buff-community` (~1.4 GB), with all Buff services — Windmill is not part of it. The agent sandbox is a separate image, `buff-community-sandbox`, which `install.sh` builds on your machine on top of the same stock Windmill (all runtimes, as in SaaS) and hands to the inner docker without a second download; we do not distribute it. Third-party licences: [THIRD-PARTY.md](THIRD-PARTY.md).
 
 ## Contributing
 

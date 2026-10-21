@@ -106,9 +106,11 @@ services:
       CONNECTOR_BRIDGE_URL: "http://buff:8792/connector/mcp"
       CONFIG_READ_TOKEN_FILE: /data/secrets/config/config_read.token
       PIPELINE_TOKEN_FILE: /data/secrets/config/pipeline.token
-      DEVELOPMENT_ROOT: /data/development
-      AUDIT_ROOT: /data/audit
-      DEV_RUN_MANIFEST_DIR: /data/runs
+      # Корневые каталоги прогонов — по тем же путям, что в контейнере сервисов и в песочнице (часть
+      # шагов знает их как /development, /audit, /runs без настройки).
+      DEVELOPMENT_ROOT: /development
+      AUDIT_ROOT: /audit
+      DEV_RUN_MANIFEST_DIR: /runs
       AGENT_IMAGE: "${SANDBOX_IMAGE:-buff-community-sandbox:local}"
       AGENT_RUNTIME: runc
       SANDBOX_SELF: "http://buff:8793"
@@ -124,6 +126,9 @@ services:
       # Промпты флоу — по путям, которые шаги знают как корневые (наш контейнер кладёт их на том при старте).
       - { type: volume, source: buff-data, target: /prompts, volume: { subpath: prompts } }
       - { type: volume, source: buff-data, target: /dev-prompts, volume: { subpath: dev-prompts } }
+      - { type: volume, source: buff-data, target: /development, volume: { subpath: development } }
+      - { type: volume, source: buff-data, target: /audit, volume: { subpath: audit } }
+      - { type: volume, source: buff-data, target: /runs, volume: { subpath: runs } }
     depends_on:
       db: { condition: service_healthy }
       windmill: { condition: service_started }

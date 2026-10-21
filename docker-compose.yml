@@ -132,7 +132,7 @@ services:
     depends_on:
       db: { condition: service_healthy }
       windmill: { condition: service_started }
-      buff: { condition: service_started }
+      buff: { condition: service_healthy }
     restart: unless-stopped
 
   nats:
@@ -195,6 +195,13 @@ services:
       - ./connector:/data/connector
       # Образ установки, скачанный install.sh (#619): отсюда внутренний docker берёт образ песочниц.
       - ./images:/images:ro
+    # Готовность для воркеров (#620): каталоги тома и сокет внутреннего dockerd на месте.
+    healthcheck:
+      test: ["CMD", "sh", "-c", "test -d /data/prompts && test -d /data/dev-prompts && test -S /run/buff-docker/docker.sock"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
     depends_on:
       db: { condition: service_healthy }
       gitea: { condition: service_started }

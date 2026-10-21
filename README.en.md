@@ -8,7 +8,7 @@ The free edition of [Buff](https://buff.systems) for the internal use of one org
 
 | | Requirement |
 |---|---|
-| Linux | Ubuntu 22.04 or 24.04 (amd64), kernel 5.7 or newer, a user with `sudo`. Runners work inside [Sysbox](https://github.com/nestybox/sysbox) — no privileged containers |
+| Linux | Ubuntu 22.04 or 24.04 (amd64), kernel 5.7 or newer, a user with `sudo`, `git` installed. Runners work inside [Sysbox](https://github.com/nestybox/sysbox) — no privileged containers |
 | macOS, Windows | [Docker Desktop](https://docs.docker.com/desktop/); on Windows run the script from Git Bash. **There is no Sysbox here, so our container runs privileged** — fine for a personal machine, not for a server |
 | Resources | at least 4 CPU and 8 GB RAM (one development at a time); 8 CPU and 16 GB recommended for three concurrent ones. About 12 GB of disk for images (stock ones, ours and the locally built sandbox) plus room for your repositories: data lives in Docker volumes, not in the image |
 | Internet | images from ghcr.io and Docker Hub, the daily licence check at buff.systems, your model endpoint |

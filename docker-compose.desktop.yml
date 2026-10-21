@@ -1,0 +1,9 @@
+# Режим Docker Desktop — macOS и Windows (#621). Sysbox там нет, поэтому наш контейнер
+# запускается привилегированным: иначе внутренний docker для раннеров и песочниц не стартует.
+# На Linux с Sysbox этот файл не нужен — контейнер работает без privileged.
+# install.sh включает его сам (COMPOSE_FILE в .env); вручную:
+#   docker compose -f docker-compose.yml -f docker-compose.desktop.yml up -d
+services:
+  buff:
+    runtime: runc
+    privileged: true

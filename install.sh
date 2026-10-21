@@ -1,139 +1,148 @@
 #!/usr/bin/env bash
-# Buff Community Edition — установка на чистый хост (#605, #606; эпик #600).
+# Buff Community Edition — установка (#605, #606, #621; эпик #600).
+#
+# Два режима, выбирается сам:
+#   Linux (Ubuntu 22.04/24.04, amd64): Docker Engine + Sysbox — наш контейнер получает СВОЙ
+#     dockerd для раннеров и песочниц без privileged и без сокета хоста.
+#   Docker Desktop (macOS, Windows через Git Bash, Linux с Docker Desktop): Sysbox нет,
+#     контейнер запускается привилегированным (docker-compose.desktop.yml).
 #
 # Что делает (идемпотентно, повтор — норма):
-#   1. Docker Engine из официального репозитория Docker (если его нет).
-#   2. Sysbox CE закреплённой версии: среда выполнения, в которой наш контейнер получает
-#      СВОЙ dockerd для раннеров инструментов разработки — без privileged и без сокета хоста.
-#   3. daemon.json: runtime sysbox-runc, live-restore, выключенные time-namespaces (Docker ≥ 29
-#      даёт каждому контейнеру своё пространство времени, Sysbox 0.7 его не знает), запас сетей.
-#   4. Сторож клина sysbox-fs раз в минуту (cron).
-#   5. Текущего пользователя — в группу docker.
-#   6. Образ выпуска — с GitHub (ghcr.io), либо из файла в images/ для закрытого контура.
-#   7. Если рядом лежит docker-compose.yml — `docker compose up -d`.
+#   Linux: 1. Docker Engine; 2. Sysbox CE закреплённой версии; 3. daemon.json (runtime sysbox-runc,
+#   live-restore, без time-namespaces, запас сетей); 4. сторож клина sysbox-fs (cron);
+#   5. текущего пользователя — в группу docker.
+#   Оба: 6. образ выпуска — с GitHub (ghcr.io) или из файла в images/ (закрытый контур);
+#   7. .env со случайными паролями; 8. docker compose up -d и ход первого старта в терминале.
 #
-# Запуск: обычным пользователем с sudo (не под root):  ./install.sh
-# Требования: Ubuntu 22.04/24.04 (amd64), ядро ≥ 5.7, выделенная ВМ (не Docker Desktop).
+# Запуск: обычным пользователем (на Linux — с sudo, не под root):  ./install.sh
 set -euo pipefail
 
 SYSBOX_VERSION="${SYSBOX_VERSION:-0.7.1}"
 SYSBOX_SHA256="${SYSBOX_SHA256:-9d6d5484f980d0a17f86c492c1262015c2afb66280bdb97215b79fde6a0261c5}"
 SANDBOX_POOL="${SANDBOX_POOL:-10.200.0.0/16}"
 WEDGE_MINUTES="${WEDGE_MINUTES:-3}"
+BOOT_TIMEOUT="${BOOT_TIMEOUT:-2400}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 say() { printf '\033[1m[buff]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[buff]\033[0m %s\n' "$*" >&2; exit 1; }
 
-[ "$(id -u)" -ne 0 ] || die "запускайте обычным пользователем с sudo, не под root"
-sudo -n true 2>/dev/null || die "нужен sudo без пароля для этого пользователя (или введите пароль: sudo -v) и повторите"
-[ "$(uname -m)" = "x86_64" ] || die "поддерживается только amd64 (x86_64)"
-. /etc/os-release
-[ "${ID:-}" = "ubuntu" ] && [[ "${VERSION_ID:-}" =~ ^(22|24)\.04$ ]] || die "поддерживается Ubuntu 22.04 / 24.04, здесь: ${PRETTY_NAME:-?}"
-kver="$(uname -r | cut -d- -f1)"
-[ "$(printf '%s\n5.7\n' "$kver" | sort -V | head -1)" = "5.7" ] || die "ядро $kver старше 5.7 — Sysbox нужен seccomp notify"
+# ---- режим ----------------------------------------------------------------------------------
+MODE=linux
+case "$(uname -s)" in Darwin | MINGW* | MSYS* | CYGWIN*) MODE=desktop ;; esac
+if [ "$MODE" = linux ] && command -v docker >/dev/null 2>&1 && docker info 2>/dev/null | grep -q "Docker Desktop"; then MODE=desktop; fi
+# BUFF_MODE=desktop — принудительно режим Docker Desktop (например, Linux без Sysbox).
+MODE="${BUFF_MODE:-$MODE}"
+[ "$(uname -m)" = "x86_64" ] || [ "$(uname -m)" = "arm64" ] || [ "$(uname -m)" = "aarch64" ] || die "поддерживаются amd64 и arm64, здесь: $(uname -m)"
 
-export DEBIAN_FRONTEND=noninteractive
-APT="sudo -E apt-get -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=1"
-
-# ---- 1. Docker Engine -----------------------------------------------------------------------
-if ! command -v docker >/dev/null 2>&1; then
-  say "ставлю Docker Engine (официальный репозиторий Docker)"
-  $APT -qq update
-  $APT -qq install -y ca-certificates curl gnupg
-  sudo install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
-  sudo chmod a+r /etc/apt/keyrings/docker.gpg
-  echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" \
-    | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-  $APT -qq update
-  $APT -qq install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+if [ "$MODE" = desktop ]; then
+  say "режим Docker Desktop: без Sysbox, контейнер работает привилегированным"
+  command -v docker >/dev/null 2>&1 || die "нужен Docker Desktop: https://docs.docker.com/desktop/ — поставьте, запустите и повторите"
+  docker info >/dev/null 2>&1 || die "Docker Desktop не отвечает — запустите его и повторите"
+  docker compose version >/dev/null 2>&1 || die "в Docker Desktop нет docker compose — обновите Docker Desktop"
+  [ "$(uname -m)" = "x86_64" ] || say "внимание: образ собран для amd64 — на arm64 (Apple Silicon) он идёт через эмуляцию, медленно"
+  D="docker"
 else
-  say "Docker уже есть: $(docker --version)"
-fi
-docker compose version >/dev/null 2>&1 || { say "ставлю docker compose plugin"; $APT -qq update; $APT -qq install -y docker-compose-plugin; }
-
-# ---- 2. Sysbox ------------------------------------------------------------------------------
-installed="$(dpkg-query -W -f='${Version}' sysbox-ce 2>/dev/null || true)"
-if [[ "$installed" != "$SYSBOX_VERSION"* ]]; then
-  say "ставлю Sysbox CE $SYSBOX_VERSION (сейчас: ${installed:-нет})"
-  $APT -qq update || true
-  $APT -qq install -y jq fuse3 cron
-  deb="/tmp/sysbox-ce_${SYSBOX_VERSION}.deb"
-  curl -fsSL -o "$deb" "https://downloads.nestybox.com/sysbox/releases/v${SYSBOX_VERSION}/sysbox-ce_${SYSBOX_VERSION}-0.linux_amd64.deb"
-  echo "${SYSBOX_SHA256}  ${deb}" | sha256sum -c - >/dev/null || die "контрольная сумма пакета Sysbox не сошлась"
-  # Песочницы старой версии не переживут обновление sysbox-fs/sysbox-mgr — снять заранее.
-  ids="$(sudo docker ps -q 2>/dev/null | xargs -r sudo docker inspect 2>/dev/null | jq -r '.[] | select(.HostConfig.Runtime == "sysbox-runc") | .Id' || true)"
-  [ -z "$ids" ] || sudo docker rm -f $ids >/dev/null
-  $APT -qq install -y "$deb"
-else
-  say "Sysbox $installed уже стоит"
-fi
-sudo systemctl enable --now sysbox >/dev/null 2>&1 || true
-
-# ---- 3. daemon.json -------------------------------------------------------------------------
-f=/etc/docker/daemon.json
-sudo test -s "$f" || echo '{}' | sudo tee "$f" >/dev/null
-want="$(sudo jq -S --arg pool "$SANDBOX_POOL" '
-  .["live-restore"] = true
-  | .features = ((.features // {}) + {"time-namespaces": false})
-  | .runtimes = ((.runtimes // {}) + {"sysbox-runc": {"path": "/usr/bin/sysbox-runc"}})
-  | .["default-address-pools"] = ((.["default-address-pools"] // [])
-      | if any(.[]; .base == $pool) then . else . + [{"base": $pool, "size": 24}] end)' "$f")"
-if [ "$want" != "$(sudo jq -S . "$f")" ]; then
-  say "обновляю $f (live-restore, без time-namespaces, runtime sysbox-runc, пул сетей)"
-  printf '%s\n' "$want" | sudo tee "$f.new" >/dev/null && sudo mv "$f.new" "$f"
-  sudo systemctl reload docker   # live-restore подхватывается по SIGHUP…
-  sudo systemctl restart docker  # …и тогда перезапуск применяет features, не трогая контейнеры
+  [ "$(id -u)" -ne 0 ] || die "запускайте обычным пользователем с sudo, не под root"
+  sudo -n true 2>/dev/null || die "нужен sudo без пароля для этого пользователя (или введите пароль: sudo -v) и повторите"
+  [ "$(uname -m)" = "x86_64" ] || die "на Linux поддерживается только amd64 (x86_64)"
+  . /etc/os-release
+  [ "${ID:-}" = "ubuntu" ] && [[ "${VERSION_ID:-}" =~ ^(22|24)\.04$ ]] || die "поддерживается Ubuntu 22.04 / 24.04, здесь: ${PRETTY_NAME:-?}"
+  kver="$(uname -r | cut -d- -f1)"
+  [ "$(printf '%s\n5.7\n' "$kver" | sort -V | head -1)" = "5.7" ] || die "ядро $kver старше 5.7 — Sysbox нужен seccomp notify"
+  export DEBIAN_FRONTEND=noninteractive
+  APT="sudo -E apt-get -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=1"
+  D="sudo docker"
 fi
 
-# ---- 4. Сторож клина sysbox-fs ---------------------------------------------------------------
-command -v crontab >/dev/null 2>&1 || { $APT -qq update || true; $APT -qq install -y cron; }
-sudo systemctl enable --now cron >/dev/null 2>&1 || true
-sudo install -m 0755 "$HERE/sysbox-fuse-watchdog.sh" /usr/local/sbin/sysbox-fuse-watchdog
-line="* * * * * /bin/bash /usr/local/sbin/sysbox-fuse-watchdog ${WEDGE_MINUTES} >> /var/log/sysbox-fuse-watchdog.log 2>&1"
-{ sudo crontab -l 2>/dev/null | grep -v sysbox-fuse-watchdog || true; echo "$line"; } | sudo crontab -
+if [ "$MODE" = linux ]; then
+  # ---- 1. Docker Engine -----------------------------------------------------------------------
+  if ! command -v docker >/dev/null 2>&1; then
+    say "ставлю Docker Engine (официальный репозиторий Docker)"
+    $APT -qq update
+    $APT -qq install -y ca-certificates curl gnupg
+    sudo install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" \
+      | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+    $APT -qq update
+    $APT -qq install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  else
+    say "Docker уже есть: $(docker --version)"
+  fi
+  docker compose version >/dev/null 2>&1 || { say "ставлю docker compose plugin"; $APT -qq update; $APT -qq install -y docker-compose-plugin; }
 
-# ---- 5. Пользователь в docker ---------------------------------------------------------------
-if ! id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
-  sudo usermod -aG docker "$USER"
-  say "добавил $USER в группу docker — текущая сессия ещё без неё, ниже команды идут через sudo"
+  # ---- 2. Sysbox ------------------------------------------------------------------------------
+  installed="$(dpkg-query -W -f='${Version}' sysbox-ce 2>/dev/null || true)"
+  if [[ "$installed" != "$SYSBOX_VERSION"* ]]; then
+    say "ставлю Sysbox CE $SYSBOX_VERSION (сейчас: ${installed:-нет})"
+    $APT -qq update || true
+    $APT -qq install -y jq fuse3 cron
+    deb="/tmp/sysbox-ce_${SYSBOX_VERSION}.deb"
+    curl -fsSL -o "$deb" "https://downloads.nestybox.com/sysbox/releases/v${SYSBOX_VERSION}/sysbox-ce_${SYSBOX_VERSION}-0.linux_amd64.deb"
+    echo "${SYSBOX_SHA256}  ${deb}" | sha256sum -c - >/dev/null || die "контрольная сумма пакета Sysbox не сошлась"
+    # Песочницы старой версии не переживут обновление sysbox-fs/sysbox-mgr — снять заранее.
+    ids="$(sudo docker ps -q 2>/dev/null | xargs -r sudo docker inspect 2>/dev/null | jq -r '.[] | select(.HostConfig.Runtime == "sysbox-runc") | .Id' || true)"
+    [ -z "$ids" ] || sudo docker rm -f $ids >/dev/null
+    $APT -qq install -y "$deb"
+  else
+    say "Sysbox $installed уже стоит"
+  fi
+  sudo systemctl enable --now sysbox >/dev/null 2>&1 || true
+
+  # ---- 3. daemon.json -------------------------------------------------------------------------
+  f=/etc/docker/daemon.json
+  sudo test -s "$f" || echo '{}' | sudo tee "$f" >/dev/null
+  want="$(sudo jq -S --arg pool "$SANDBOX_POOL" '
+    .["live-restore"] = true
+    | .features = ((.features // {}) + {"time-namespaces": false})
+    | .runtimes = ((.runtimes // {}) + {"sysbox-runc": {"path": "/usr/bin/sysbox-runc"}})
+    | .["default-address-pools"] = ((.["default-address-pools"] // [])
+        | if any(.[]; .base == $pool) then . else . + [{"base": $pool, "size": 24}] end)' "$f")"
+  if [ "$want" != "$(sudo jq -S . "$f")" ]; then
+    say "обновляю $f (live-restore, без time-namespaces, runtime sysbox-runc, пул сетей)"
+    printf '%s\n' "$want" | sudo tee "$f.new" >/dev/null && sudo mv "$f.new" "$f"
+    sudo systemctl reload docker   # live-restore подхватывается по SIGHUP…
+    sudo systemctl restart docker  # …и тогда перезапуск применяет features, не трогая контейнеры
+  fi
+
+  # ---- 4. Сторож клина sysbox-fs ---------------------------------------------------------------
+  command -v crontab >/dev/null 2>&1 || { $APT -qq update || true; $APT -qq install -y cron; }
+  sudo systemctl enable --now cron >/dev/null 2>&1 || true
+  sudo install -m 0755 "$HERE/sysbox-fuse-watchdog.sh" /usr/local/sbin/sysbox-fuse-watchdog
+  line="* * * * * /bin/bash /usr/local/sbin/sysbox-fuse-watchdog ${WEDGE_MINUTES} >> /var/log/sysbox-fuse-watchdog.log 2>&1"
+  { sudo crontab -l 2>/dev/null | grep -v sysbox-fuse-watchdog || true; echo "$line"; } | sudo crontab -
+
+  # ---- 5. Пользователь в docker ---------------------------------------------------------------
+  if ! id -nG "$USER" | tr ' ' '\n' | grep -qx docker; then
+    sudo usermod -aG docker "$USER"
+    say "добавил $USER в группу docker — текущая сессия ещё без неё, ниже команды идут через sudo"
+  fi
+
+  say "проверяю Sysbox живым контейнером"
+  $D run --rm --runtime=sysbox-runc alpine:3.20 true >/dev/null && say "Sysbox работает"
 fi
-D="sudo docker"
-
-# ---- Проверка: песочница поднимается ---------------------------------------------------------
-say "проверяю Sysbox живым контейнером"
-$D run --rm --runtime=sysbox-runc alpine:3.20 true >/dev/null && say "Sysbox работает"
 
 # ---- 6. Образ установки (#619) -------------------------------------------------------------
-# Образ выпуска лежит на GitHub (ghcr.io) — docker pull. Закрытый контур: файл образа и его
-# .sha256 в images/ (перенесены носителем) загружаются вместо скачивания.
+# Образ выпуска лежит на GitHub (ghcr.io) — docker pull показывает ход скачивания сам.
+# Закрытый контур: файл образа и его .sha256 в images/ (перенесены носителем) загружаются
+# вместо скачивания.
+sha256_check() { if command -v sha256sum >/dev/null 2>&1; then sha256sum -c --quiet "$1"; else shasum -a 256 -c --quiet "$1"; fi; }
 fetch_image() {
   local image="$1" dir="$HERE/images" file="buff-community.tar.zst"
-  if sudo docker image inspect "$image" >/dev/null 2>&1; then say "образ $image уже в docker"; return 0; fi
+  if $D image inspect "$image" >/dev/null 2>&1; then say "образ $image уже в docker"; return 0; fi
   mkdir -p "$dir"
   if [ -s "$dir/$file" ] && [ -s "$dir/$file.sha256" ]; then
-    command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
-    (cd "$dir" && sha256sum -c --quiet "$file.sha256") || die "образ в $dir не сходится с контрольной суммой"
+    command -v zstd >/dev/null 2>&1 || { [ "$MODE" = linux ] || die "для файла образа нужен zstd (brew install zstd)"; say "ставлю zstd"; $APT -qq install -y zstd; }
+    (cd "$dir" && sha256_check "$file.sha256") || die "образ в $dir не сходится с контрольной суммой"
     say "загружаю образ из $dir/$file"
-    zstd -dc "$dir/$file" | sudo docker load >/dev/null
+    zstd -dc "$dir/$file" | $D load >/dev/null
   else
-    # Пока пакет на ghcr.io закрыт (до публикации, #608): GHCR_TOKEN=<токен> ./install.sh — вход
-    # на хосте, а для внутреннего докера песочниц, у которого входа нет, образ сохраняется файлом.
-    if [ -n "${GHCR_TOKEN:-}" ]; then
-      say "вход в ghcr.io под ${GHCR_USER:-buffsystems}"
-      printf '%s' "$GHCR_TOKEN" | sudo docker login ghcr.io -u "${GHCR_USER:-buffsystems}" --password-stdin >/dev/null || die "вход в ghcr.io не удался — проверьте GHCR_TOKEN"
-    fi
-    say "скачиваю образ $image"
-    sudo docker pull "$image" || die "образ $image не скачался — проверьте BUFF_IMAGE и доступ к ghcr.io"
-    if [ -n "${GHCR_TOKEN:-}" ]; then
-      command -v zstd >/dev/null 2>&1 || { say "ставлю zstd"; $APT -qq install -y zstd; }
-      say "закрытый пакет: сохраняю образ в $dir для внутреннего докера песочниц"
-      sudo docker save "$image" | zstd -T0 -3 -q -o "$dir/$file" --force && (cd "$dir" && sha256sum "$file" > "$file.sha256")
-      sed -i 's#^AGENT_IMAGE_PULL=.*#AGENT_IMAGE_PULL=0#' "$HERE/.env"
-    fi
+    say "скачиваю образ $image (несколько гигабайт — ход ниже)"
+    $D pull "$image" || die "образ $image не скачался — проверьте BUFF_IMAGE и доступ к ghcr.io"
   fi
-  sudo docker image inspect "$image" >/dev/null 2>&1 || die "после загрузки образа $image в docker нет — проверьте BUFF_IMAGE"
+  $D image inspect "$image" >/dev/null 2>&1 || die "после загрузки образа $image в docker нет — проверьте BUFF_IMAGE"
 }
 
 # ---- 7. Настройки установки (.env) -----------------------------------------------------------
@@ -142,26 +151,68 @@ fetch_image() {
 if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   say "создаю .env"
   rand() { head -c 48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c "$1"; }
-  ip="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -1)"
+  ip=""
+  if [ "$MODE" = linux ]; then ip="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' | head -1)"; fi
   cp "$HERE/.env.example" "$HERE/.env"
-  put() { sed -i "s#^$1=.*#$1=$2#" "$HERE/.env"; }
+  put() { sed -i.bak "s#^$1=.*#$1=$2#" "$HERE/.env" && rm -f "$HERE/.env.bak"; }
   put APP_URL "http://${ip:-127.0.0.1}:8138"
   put ADMIN_EMAIL "admin@${ip:-localhost}"
   put ADMIN_PASSWORD "$(rand 20)"
   put PG_PASSWORD "$(rand 32)"
   put GITEA_ADMIN_PASSWORD "$(rand 24)"
   put WM_ADMIN_PASSWORD "$(rand 24)"
+  if [ "$MODE" = desktop ]; then sed -i.bak 's#^\# COMPOSE_FILE=#COMPOSE_FILE=#' "$HERE/.env" && rm -f "$HERE/.env.bak"; fi
   chmod 600 "$HERE/.env"
   say "пароли записаны в $HERE/.env (пароль администратора — ADMIN_PASSWORD); впишите ORG, LLM_* и при необходимости APP_URL"
 fi
 
-# ---- 7. Сборка -------------------------------------------------------------------------------
+# ---- 8. Сборка и первый старт ----------------------------------------------------------------
+# Ход первого старта виден здесь: строки «[bootstrap]» нашего контейнера до «готово». Повторный
+# запуск уже работающей сборки ничего не ждёт.
+follow_bootstrap() {
+  local since="$1" cid="$2" started log lp n seen=0 state
+  started=$(date +%s); log="$(mktemp)"
+  $D compose logs -f --no-log-prefix --since "$since" buff >"$log" 2>&1 &
+  lp=$!
+  while kill -0 "$lp" 2>/dev/null; do
+    n=$(grep -c '\[bootstrap\]' "$log" 2>/dev/null || true); n=${n:-0}
+    if [ "$n" -gt "$seen" ]; then
+      grep '\[bootstrap\]' "$log" | sed -n "$((seen + 1)),${n}p" | sed "s/.*\[bootstrap\]$(printf '\033')\[0m //; s/.*\[bootstrap\] //" \
+        | while IFS= read -r l; do printf '  %4ds  %s\n' "$(($(date +%s) - started))" "$l"; done
+      seen=$n
+    fi
+    if grep -q 'готово:' "$log"; then kill "$lp" 2>/dev/null; rm -f "$log"; return 0; fi
+    state="$($D inspect -f '{{.State.Status}}' "$cid" 2>/dev/null || true)"
+    if [ -n "$state" ] && [ "$state" != "running" ]; then
+      kill "$lp" 2>/dev/null; tail -n 20 "$log" >&2; rm -f "$log"
+      die "контейнер buff остановился (состояние: $state) — выше последние строки его журнала; полный: docker compose logs buff"
+    fi
+    if [ $(($(date +%s) - started)) -ge "$BOOT_TIMEOUT" ]; then
+      kill "$lp" 2>/dev/null; rm -f "$log"
+      die "первый старт не завершился за $((BOOT_TIMEOUT / 60)) минут — смотрите docker compose logs buff"
+    fi
+    sleep 3
+  done
+  rm -f "$log"
+  die "журнал контейнера buff прервался — смотрите docker compose logs buff"
+}
+
 if [ -f "$HERE/docker-compose.yml" ]; then
   envget() { grep "^$1=" "$HERE/.env" | head -1 | cut -d= -f2-; }
   fetch_image "$(envget BUFF_IMAGE)"
+  cd "$HERE"
+  before="$($D compose ps -q buff 2>/dev/null || true)"
+  since="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   say "поднимаю сборку: docker compose up -d"
-  (cd "$HERE" && $D compose up -d)
-  say "готово — приложение: $(grep ^APP_URL= "$HERE/.env" | cut -d= -f2-), админка — порт 8150; первый старт занимает несколько минут: docker compose logs -f buff"
+  $D compose up -d
+  after="$($D compose ps -q buff 2>/dev/null || true)"
+  if [ -n "$before" ] && [ "$before" = "$after" ]; then
+    say "сборка уже работала — приложение: $(envget APP_URL), админка — порт $(envget ADMIN_PORT)"
+  else
+    say "первый старт: базы, учётные записи, выкладка пайплайна — несколько минут"
+    follow_bootstrap "$since" "$after"
+    say "готово — приложение: $(envget APP_URL), админка: порт $(envget ADMIN_PORT) (пользователь admin, пароль ADMIN_PASSWORD из .env)"
+  fi
 else
   say "docker-compose.yml рядом нет — хост подготовлен, сборка поднимается отдельно"
 fi

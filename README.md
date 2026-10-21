@@ -1,13 +1,18 @@
 # Buff Community Edition
 
-Бесплатное издание [Buff](https://buff.systems) для внутреннего использования одной организацией: ИИ-разработка по задачам, «Спросить», исследования и база знаний — на вашей машине, с вашей моделью. Лицензия — [LICENSE.md](LICENSE.md); чем Community отличается от SaaS и Enterprise — на [сайте](https://buff.systems/docs/self-hosted).
+*[English version](README.en.md)*
+
+Бесплатное издание [Buff](https://buff.systems) для внутреннего использования одной организацией: ИИ-разработка по задачам, «Спросить», глубокие исследования и база знаний — на вашей машине, с вашей моделью. Полная документация — [buff.systems/docs/self-hosted/community](https://buff.systems/docs/self-hosted/community); чем Community отличается от SaaS и Enterprise — на странице [Издания](https://buff.systems/docs/self-hosted). Лицензия — [LICENSE.md](LICENSE.md).
 
 ## Что нужно
 
-- Выделенная виртуальная машина: Ubuntu 22.04 или 24.04 (amd64), ядро ≥ 5.7, 8 CPU, 32 ГБ памяти, диск от 300 ГБ (образы и репозитории). Не Docker Desktop.
-- Пользователь с `sudo` (ставить под root не нужно).
-- Доступ в интернет: образы с ghcr.io и Docker Hub, суточная проверка лицензии на buff.systems.
-- Ключ к OpenAI-совместимому эндпоинту модели: OpenRouter, свой LiteLLM, vLLM и т. п.
+| | Требование |
+|---|---|
+| Linux | Ubuntu 22.04 или 24.04 (amd64), ядро не ниже 5.7, пользователь с `sudo`. Раннеры работают в [Sysbox](https://github.com/nestybox/sysbox) — без привилегированных контейнеров |
+| macOS, Windows | [Docker Desktop](https://docs.docker.com/desktop/); на Windows скрипт запускается из Git Bash. **Sysbox здесь нет, поэтому наш контейнер работает привилегированным** — подходит для личной машины, не для сервера |
+| Ресурсы | минимум 4 CPU и 8 ГБ памяти (одна разработка за раз); рекомендуется 8 CPU и 16 ГБ для трёх одновременных. На диске ~20 ГБ под образы плюс место под ваши репозитории: данные лежат в томах Docker, не в образе |
+| Интернет | образы с ghcr.io и Docker Hub, суточная проверка лицензии на buff.systems, ваш эндпоинт модели |
+| Модель | ключ к OpenAI-совместимому эндпоинту: [OpenRouter](https://openrouter.ai), свой LiteLLM, vLLM, Ollama и т. п. |
 
 ## Установка
 
@@ -17,15 +22,7 @@ cd buff-community
 ./install.sh
 ```
 
-Пока издание не опубликовано, репозиторий и пакет образа на GitHub закрыты: клонируйте с токеном GitHub, у которого есть `repo` и `read:packages`, и передайте тот же токен скрипту — он войдёт в ghcr.io и сохранит образ файлом в `images/` для внутреннего докера песочниц:
-
-```sh
-git clone https://<токен>@github.com/buffsystems/buff-community.git
-cd buff-community
-GHCR_TOKEN=<токен> ./install.sh
-```
-
-`install.sh` ставит Docker и [Sysbox](https://github.com/nestybox/sysbox) (в нём раннеры инструментов разработки работают без `privileged`), создаёт `.env` со случайными паролями и поднимает `docker compose`. Первый старт занимает несколько минут: следить — `docker compose logs -f buff`, готовность — строка `готово`.
+Скрипт сам определяет режим. На Linux он ставит Docker и Sysbox; с Docker Desktop — использует его и добавляет `docker-compose.desktop.yml` (привилегированный режим). Дальше в обоих случаях: создаёт `.env` со случайными паролями, скачивает образ издания, поднимает `docker compose` и показывает ход первого старта прямо в терминале — до строки «готово» (несколько минут: базы, учётные записи, выкладка пайплайна). Запускайте обычным пользователем, root не нужен.
 
 До первого входа откройте `.env` и впишите:
 
@@ -35,39 +32,39 @@ GHCR_TOKEN=<токен> ./install.sh
 | `ADMIN_USER`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` | первый пользователь приложения и администратор (пароль сгенерирован) |
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | эндпоинт, ключ и модель, например `https://openrouter.ai/api/v1`, `sk-or-…`, `openai/gpt-4.1` |
 | `APP_URL` | адрес, по которому люди откроют приложение (по умолчанию — IP машины, порт 8138) |
-| `RUNNERS` | сколько разработок идут одновременно (не больше предела лицензии, по умолчанию 3) |
+| `RUNNERS` | сколько воркеров разработки запустить — столько разработок пойдут одновременно (по умолчанию 3, каждая — до 1,5 ГБ памяти). Выше предела лицензии значение не действует: предел подписан в лицензии и виден в админке → «Лицензия» (Community — 15) |
 
 Изменили `.env` — `docker compose up -d` применит.
 
 ## Первый вход
 
-- Приложение: `APP_URL` (`http://<машина>:8138/app/`), логин `ADMIN_USER` с паролем из `.env`. Код по почте не требуется.
-- Админка: `http://<машина>:8150`, пользователь `admin`, тот же пароль. Разделы: пользователи (новых заводит администратор), модель, воркеры, лицензия.
-- Лицензия: в админке → «Лицензия» укажите организацию и почту — инсталляция зарегистрируется на buff.systems при ближайшей проверке и получит бессрочную лицензию Community (3 пользователя, до 15 раннеров). Без лицензии новые задачи не стартуют, вход и чтение работают.
+- Приложение: `APP_URL` (`http://<машина>:8138/app/`), логин `ADMIN_USER` с паролем из `.env`.
+- Админка: `http://<машина>:8150`, пользователь `admin`, тот же пароль. Разделы: пользователи (новых заводит администратор), конфигурация модели, воркеры, лицензия.
+- Лицензия: в админке → «Лицензия» укажите организацию и почту, подтвердите согласие на обработку этих данных — инсталляция зарегистрируется на buff.systems при ближайшей проверке и получит бессрочную лицензию Community: 3 пользователя, 15 одновременных разработок, одна организация. Пределы видны там же. Без лицензии новые задачи не стартуют, вход и чтение работают.
 
 ## Обновление
 
 ```sh
 git pull
-docker compose pull && docker compose up -d
+./install.sh
 ```
 
-Миграции базы применяются при старте. Данные — в томах `pgdata`, `gitea-data`, `buff-data`, `buff-docker`: бэкап = `docker compose stop` + копия томов.
+Впишите в `.env` новый `BUFF_IMAGE` из обновлённого `.env.example` — скрипт скачает образ и перезапустит контейнеры. Миграции базы применяются при старте. Данные — в томах `pgdata`, `gitea-data`, `buff-data`, `buff-docker`: бэкап = `docker compose stop` + копия томов.
 
 ## Диагностика
 
 - `docker compose ps`, `docker compose logs buff` — наш контейнер держит сервисы под супервизором: `docker compose exec buff supervisorctl status`.
 - Повторить первый старт безопасно: `docker compose exec buff buff-bootstrap`.
-- Вопросы и ошибки — в issues этого репозитория. Поддержка Community Edition не предоставляется.
+- Вопросы и ошибки — в [issues](https://github.com/buffsystems/buff-community/issues) этого репозитория; как их оформлять — в [CONTRIBUTING.md](CONTRIBUTING.md). Поддержка Community Edition не предоставляется.
+
+## Центральный коннектор
+
+Единственный коннектор установки запускается внутри контейнера и сопрягается с вашей организацией сам. Git-провайдеры и токены — в `connector/connector.yaml`; после правки: `docker compose exec buff supervisorctl restart services:connector`. Подробнее — в [документации](https://buff.systems/docs/self-hosted/community#центральный-коннектор).
 
 ## Состав
 
 Стоковые образы PostgreSQL, Gitea, NATS, Windmill (сервер), Apache Tika и один наш образ `buff-community` со всеми сервисами Buff. Сторонние лицензии — [THIRD-PARTY.md](THIRD-PARTY.md). Windmill загружается с ghcr.io на условиях его авторов и не входит в наш образ.
 
----
+## Участие
 
-**English.** Buff Community Edition: free, for internal use of one organisation. Requirements: a dedicated Ubuntu 22.04/24.04 VM (kernel ≥ 5.7, 8 CPU, 32 GB RAM, 300 GB disk), a sudo user, internet access, an OpenAI-compatible model endpoint key. Install: clone, `./install.sh`, fill `ORG`, `ADMIN_*`, `LLM_*` in `.env`, `docker compose up -d`. App at `http://<host>:8138/app/`, admin at `:8150`. Register the installation in Admin → Licence to receive the perpetual Community licence (3 users, 15 runners). Update with `git pull && docker compose pull && docker compose up -d`. Licence: [LICENSE.md](LICENSE.md).
-
-## Центральный коннектор
-
-Единственный коннектор установки запускается внутри контейнера и сопрягается с вашей организацией сам. Git-провайдеры и токены — в `connector/connector.yaml`; после правки: `docker compose exec buff supervisorctl restart services:connector`. Подробнее — в [документации](https://buff.systems/docs/self-hosted/community).
+Правки установки, документации и переводов, сообщения об ошибках — см. [CONTRIBUTING.md](CONTRIBUTING.md), включая правила для изменений, сделанных с помощью ИИ.

@@ -119,6 +119,9 @@ services:
       - buff-data:/data
       - buff-dockersock:/run/buff-docker
       - windmill-logs:/tmp/windmill/logs
+      # Промпты флоу — по путям, которые шаги знают как корневые (наш контейнер кладёт их на том при старте).
+      - { type: volume, source: buff-data, target: /prompts, volume: { subpath: prompts } }
+      - { type: volume, source: buff-data, target: /dev-prompts, volume: { subpath: dev-prompts } }
     depends_on:
       db: { condition: service_healthy }
       windmill: { condition: service_started }

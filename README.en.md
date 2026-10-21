@@ -31,7 +31,10 @@
 **Buff** turns a tracker task into a ready branch with tests, answers questions about your company's documents and writes deep research — with AI agents that work autonomously but under human control. The Community Edition installs on your own machine with one command: code, tasks and documents never leave it, the model is yours (any OpenAI-compatible endpoint).
 
 <p align="center">
-  <img src="assets/shots/dev.png" alt="Development: a project's tasks, their stages and agent status" width="880">
+  <a href="https://buff.systems/video/development" title="Development by tasks — video, 4:36, with sound">
+    <img src="assets/video-development.jpg" alt="Video: development by tasks (4:36). Click to watch with sound" width="880">
+  </a>
+  <br><sub>Video «Development by tasks», 4:36, in Russian — opens on buff.systems with sound</sub>
 </p>
 
 ## What it does
@@ -85,9 +88,9 @@ Update: `git pull && ./install.sh`. Remove: `docker compose down -v`. Everything
 
 ## Videos
 
-Product videos are attached to [release v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1) (mp4 with sound, in Russian):
+Four videos with sound, in Russian — each opens in a player on buff.systems (the mp4 files are attached to [release v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1)):
 
-| [Buff in two minutes](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/buff-promo-16x9.mp4) | [Development by tasks](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/development-16x9.mp4) | [Questions and the knowledge base](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/knowledge-16x9.mp4) | [Buff Code](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/buffcode-16x9.mp4) |
+| [Buff in two minutes](https://buff.systems/video/buff) · 1:23 | [Development by tasks](https://buff.systems/video/development) · 4:36 | [Questions and the knowledge base](https://buff.systems/video/knowledge) · 2:40 | [Buff Code](https://buff.systems/video/buff-code) · 3:22 |
 |---|---|---|---|
 
 <p align="center">
@@ -100,10 +103,12 @@ Product videos are attached to [release v0.21.1](https://github.com/buffsystems/
 | | Community | Enterprise on-premise | SaaS |
 |---|---|---|---|
 | Where it runs | your machine | your perimeter | buff.systems |
-| Organisations · users · developments | 1 · 3 · 15 | unlimited | unlimited |
+| Organisations | one | one per licence | as many as needed |
+| Users | up to 3 | unlimited | unlimited |
+| Tasks in progress at once | up to 15 | unlimited | unlimited |
 | Single sign-on, audit, support | — | yes | yes |
 | Model | yours | yours | ours or yours |
-| Price | free | a licence per organisation | per token |
+| Price | free | a licence per organisation, monthly | per token |
 
 More: [Editions](https://buff.systems/docs/self-hosted) and [pricing](https://buff.systems/pricing).
 

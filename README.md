@@ -31,7 +31,10 @@
 **Buff** превращает задачу в трекере в готовую ветку с тестами, отвечает на вопросы по документам компании и пишет глубокие исследования — силами ИИ-агентов, которые работают автономно, но под контролем человека. Community Edition ставится на вашу машину одной командой: код, задачи и документы не покидают её, модель — ваша (любой OpenAI-совместимый эндпоинт).
 
 <p align="center">
-  <img src="assets/shots/dev.png" alt="Разработка: задачи проекта, их этапы и статус агентов" width="880">
+  <a href="https://buff.systems/video/development" title="Разработка по задачам — видео, 4:36, со звуком">
+    <img src="assets/video-development.jpg" alt="Видео: разработка по задачам (4:36). Нажмите, чтобы посмотреть со звуком" width="880">
+  </a>
+  <br><sub>Видео «Разработка по задачам», 4:36 — открывается на buff.systems со звуком</sub>
 </p>
 
 ## Что умеет
@@ -85,9 +88,9 @@ cd buff-community
 
 ## Видео
 
-Ролики о продукте — в [выпуске v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1) (mp4, со звуком):
+Четыре ролика со звуком — каждый открывается на buff.systems в плеере (файлы mp4 лежат в [выпуске v0.21.1](https://github.com/buffsystems/buff-community/releases/tag/v0.21.1)):
 
-| [Buff за две минуты](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/buff-promo-16x9.mp4) | [Разработка по задачам](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/development-16x9.mp4) | [Вопросы и база знаний](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/knowledge-16x9.mp4) | [Buff Code](https://github.com/buffsystems/buff-community/releases/download/v0.21.1/buffcode-16x9.mp4) |
+| [Buff за две минуты](https://buff.systems/video/buff) · 1:23 | [Разработка по задачам](https://buff.systems/video/development) · 4:36 | [Вопросы и база знаний](https://buff.systems/video/knowledge) · 2:40 | [Buff Code](https://buff.systems/video/buff-code) · 3:22 |
 |---|---|---|---|
 
 <p align="center">
@@ -100,10 +103,12 @@ cd buff-community
 | | Community | Enterprise on-premise | SaaS |
 |---|---|---|---|
 | Где работает | ваша машина | ваш контур | buff.systems |
-| Организации · пользователи · разработки | 1 · 3 · 15 | без ограничений | без ограничений |
+| Организаций | одна | одна на лицензию | сколько нужно |
+| Пользователей | до 3 | без ограничений | без ограничений |
+| Задач в работе одновременно | до 15 | без ограничений | без ограничений |
 | Единый вход, аудит, поддержка | — | да | да |
 | Модель | ваша | ваша | наша или ваша |
-| Цена | бесплатно | лицензия на организацию | за токены |
+| Цена | бесплатно | лицензия на организацию, помесячно | за токены |
 
 Подробнее — [Издания](https://buff.systems/docs/self-hosted) и [тарифы](https://buff.systems/pricing).
 

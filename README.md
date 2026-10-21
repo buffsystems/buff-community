@@ -55,6 +55,7 @@ git pull
 
 - `docker compose ps`, `docker compose logs buff` — наш контейнер держит сервисы под супервизором: `docker compose exec buff supervisorctl status`.
 - Повторить первый старт безопасно: `docker compose exec buff buff-bootstrap`.
+- Снести установку целиком: `docker compose down -v` (тома с данными удаляются) и `sudo rm -rf` каталога комплекта — `connector/state` пишет контейнер от root.
 - Вопросы и ошибки — в [issues](https://github.com/buffsystems/buff-community/issues) этого репозитория; как их оформлять — в [CONTRIBUTING.md](CONTRIBUTING.md). Поддержка Community Edition не предоставляется.
 
 ## Центральный коннектор

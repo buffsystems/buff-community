@@ -55,6 +55,7 @@ Put the new `BUFF_IMAGE` from the updated `.env.example` into `.env` — the scr
 
 - `docker compose ps`, `docker compose logs buff` — our container keeps its services under a supervisor: `docker compose exec buff supervisorctl status`.
 - Repeating the first start is safe: `docker compose exec buff buff-bootstrap`.
+- Remove the installation entirely: `docker compose down -v` (the data volumes are deleted) and `sudo rm -rf` of the kit directory — `connector/state` is written by the container as root.
 - Questions and bugs go to this repository's [issues](https://github.com/buffsystems/buff-community/issues); see [CONTRIBUTING.en.md](CONTRIBUTING.en.md) for how to file them. No support is provided for the Community Edition.
 
 ## Central connector

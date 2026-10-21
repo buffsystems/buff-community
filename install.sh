@@ -145,6 +145,31 @@ fetch_image() {
   $D image inspect "$image" >/dev/null 2>&1 || die "после загрузки образа $image в docker нет — проверьте BUFF_IMAGE"
 }
 
+# ---- 6a. Образ песочницы агента (#620) -----------------------------------------------------------
+# Собирается здесь, на вашей машине, поверх стокового образа Windmill (sandbox/Dockerfile) — мы
+# его не распространяем. Закрытый контур: файл buff-community-sandbox.tar.zst в images/.
+build_sandbox() {
+  local image="$1" base="$2" windmill="$3" dir="$HERE/images" file="buff-community-sandbox.tar.zst"
+  if $D image inspect "$image" >/dev/null 2>&1; then say "образ песочницы $image уже в docker"; return 0; fi
+  if [ -s "$dir/$file" ] && [ -s "$dir/$file.sha256" ]; then
+    (cd "$dir" && sha256_check "$file.sha256") || die "образ песочницы в $dir не сходится с контрольной суммой"
+    say "загружаю образ песочницы из $dir/$file"
+    zstd -dc "$dir/$file" | $D load >/dev/null
+  else
+    say "собираю образ песочницы $image поверх Windmill (несколько минут — ход ниже)"
+    $D build -t "$image" --build-arg "BUFF_IMAGE=$base" --build-arg "WINDMILL_IMAGE=$windmill" "$HERE/sandbox" || die "образ песочницы не собрался — смотрите вывод выше"
+  fi
+  $D image inspect "$image" >/dev/null 2>&1 || die "образа песочницы $image в docker нет"
+}
+# Во внутренний docker нашего контейнера образ едет с хоста (docker save | load) — без второго скачивания.
+handover_sandbox() {
+  local image="$1" cid="$2"
+  if $D exec "$cid" /opt/docker-real/docker image inspect "$image" >/dev/null 2>&1; then return 0; fi
+  say "передаю образ песочницы во внутренний docker (несколько минут)"
+  $D save "$image" | $D exec -i "$cid" /opt/docker-real/docker load >/dev/null || die "образ песочницы не передался во внутренний docker — повторите ./install.sh"
+  say "образ песочницы на месте"
+}
+
 # ---- 7. Настройки установки (.env) -----------------------------------------------------------
 # Первый запуск: .env из .env.example, пароли служб и первого администратора — случайные,
 # адрес приложения — по адресу этой машины. Повтор .env не трогает.
@@ -225,6 +250,8 @@ follow_bootstrap() {
 if [ -f "$HERE/docker-compose.yml" ]; then
   envget() { grep "^$1=" "$HERE/.env" | head -1 | cut -d= -f2-; }
   fetch_image "$(envget BUFF_IMAGE)"
+  sandbox="$(envget SANDBOX_IMAGE)"; sandbox="${sandbox:-buff-community-sandbox:local}"
+  build_sandbox "$sandbox" "$(envget BUFF_IMAGE)" "$(envget WINDMILL_IMAGE)"
   cd "$HERE"
   before="$($D compose ps -q buff 2>/dev/null || true)"
   since="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -233,9 +260,11 @@ if [ -f "$HERE/docker-compose.yml" ]; then
   after="$($D compose ps -q buff 2>/dev/null || true)"
   if [ -n "$before" ] && [ "$before" = "$after" ]; then
     say "сборка уже работала — приложение: $(envget APP_URL), админка — порт $(envget ADMIN_PORT)"
+    handover_sandbox "$sandbox" "$after"
   else
     say "первый старт: базы, учётные записи, выкладка пайплайна — несколько минут"
     follow_bootstrap "$since" "$after"
+    handover_sandbox "$sandbox" "$after"
     say "готово — приложение: $(envget APP_URL), админка: порт $(envget ADMIN_PORT) (пользователь admin, пароль ADMIN_PASSWORD из .env)"
   fi
 else

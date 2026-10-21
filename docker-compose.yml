@@ -83,6 +83,48 @@ services:
       db: { condition: service_healthy }
     restart: unless-stopped
 
+  # Воркеры Windmill (#620): стоковый образ (тот же, что сервер), число — RUNNERS. Каталоги прогонов,
+  # промпты и токены — на общем томе данных; песочницы они поднимают во внутреннем dockerd нашего
+  # контейнера через сокет на общем томе, а посредник прогона просят поднять службу в нём (8793).
+  runner:
+    image: "${WINDMILL_IMAGE:-ghcr.io/windmill-labs/windmill@sha256:7f67f25ebc8d4f39563bfc0cf3346e9c34e772e5f4eb5caccd8ef713fb11b5bf}"
+    logging: *logging
+    deploy:
+      replicas: ${RUNNERS:-3}
+    environment:
+      DATABASE_URL: "postgres://windmill:${PG_PASSWORD}@db:5432/windmill"
+      MODE: worker
+      WORKER_GROUP: default
+      BASE_URL: "http://windmill:8000"
+      BASE_INTERNAL_URL: "http://windmill:8000"
+      WHITELIST_ENVS: "PATH,BACKEND_API_URL,LLM_GATEWAY_URL,CONNECTOR_BRIDGE_URL,CONFIG_READ_TOKEN_FILE,PIPELINE_TOKEN_FILE,DEVELOPMENT_ROOT,AUDIT_ROOT,DEV_RUN_MANIFEST_DIR,AGENT_IMAGE,AGENT_RUNTIME,SANDBOX_SELF,SANDBOX_DOCKER_BIN,DOCKER_HOST,EDITION"
+      EDITION: community
+      BACKEND_API_URL: "http://buff:8790"
+      LLM_GATEWAY_URL: "${LLM_BASE_URL:-https://openrouter.ai/api/v1}"
+      CONNECTOR_BRIDGE_URL: "http://buff:8792/connector/mcp"
+      CONFIG_READ_TOKEN_FILE: /data/secrets/config/config_read.token
+      PIPELINE_TOKEN_FILE: /data/secrets/config/pipeline.token
+      DEVELOPMENT_ROOT: /data/development
+      AUDIT_ROOT: /data/audit
+      DEV_RUN_MANIFEST_DIR: /data/runs
+      AGENT_IMAGE: "${SANDBOX_IMAGE:-buff-community-sandbox:local}"
+      AGENT_RUNTIME: runc
+      SANDBOX_SELF: "http://buff:8793"
+      SANDBOX_DOCKER_BIN: /usr/local/bin/docker
+      DOCKER_HOST: unix:///run/buff-docker/docker.sock
+      FAVOR_UNSHARE_PID: "false"
+      ZOMBIE_JOB_TIMEOUT: "3600"
+      FLOW_ZOMBIE_TRANSITION_TIMEOUT: "3600"
+    volumes:
+      - buff-data:/data
+      - buff-dockersock:/run/buff-docker
+      - windmill-logs:/tmp/windmill/logs
+    depends_on:
+      db: { condition: service_healthy }
+      windmill: { condition: service_started }
+      buff: { condition: service_started }
+    restart: unless-stopped
+
   nats:
     image: nats:2.10-alpine
     logging: *logging
@@ -127,14 +169,16 @@ services:
       LLM_API_KEY: "${LLM_API_KEY:-}"
       LLM_MODEL: "${LLM_MODEL:-}"
       LICENSE_RELAY_URL: "${LICENSE_RELAY_URL:-wss://buff.systems/nats}"
-      AGENT_IMAGE: "${BUFF_IMAGE}"
-      AGENT_IMAGE_PULL: "${AGENT_IMAGE_PULL:-1}"
+      # Образ песочницы агента (#620): собирает install.sh поверх стокового Windmill и передаёт сюда.
+      AGENT_IMAGE: "${SANDBOX_IMAGE:-buff-community-sandbox:local}"
     ports:
       - "${BIND_IP:-0.0.0.0}:${APP_PORT:-8138}:8138"
       - "${BIND_IP:-0.0.0.0}:${ADMIN_PORT:-8150}:8150"
     volumes:
       - buff-data:/data
       - buff-docker:/var/lib/docker
+      # Сокет внутреннего dockerd на общем томе (#620): через него воркеры запускают песочницы.
+      - buff-dockersock:/run/buff-docker
       - mw-config:/data/middleware/config
       - gitea-tokens:/data/gitea-tokens:ro
       # Центральный коннектор (#617): его настройки и состояние — рядом с compose, чтобы править без входа в контейнер.
@@ -158,3 +202,4 @@ volumes:
   nats-data:
   buff-data:
   buff-docker:
+  buff-dockersock:

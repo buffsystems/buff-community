@@ -162,8 +162,24 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   put GITEA_ADMIN_PASSWORD "$(rand 24)"
   put WM_ADMIN_PASSWORD "$(rand 24)"
   if [ "$MODE" = desktop ]; then sed -i.bak 's#^\# COMPOSE_FILE=#COMPOSE_FILE=#' "$HERE/.env" && rm -f "$HERE/.env.bak"; fi
+  # Своё — спрашиваем здесь, пока сборка не поднята: переменная окружения (ORG=acme ./install.sh)
+  # имеет приоритет, в терминале — вопрос с умолчанием, без терминала — умолчание из .env.example.
+  ask() { # переменная, подсказка, [silent]
+    local var="$1" prompt="$2" cur val
+    cur="$(grep "^$var=" "$HERE/.env" | head -1 | cut -d= -f2-)"
+    if [ -n "${!var:-}" ]; then val="${!var}"
+    elif [ -t 0 ]; then
+      if [ "${3:-}" = silent ]; then read -r -s -p "$prompt: " val; echo; else read -r -p "$prompt [${cur:-пусто}]: " val; fi
+    fi
+    [ -z "${val:-}" ] || put "$var" "$val"
+  }
+  say "настройки установки (Enter — оставить как есть, поправить можно потом в .env)"
+  ask ORG "имя вашей организации латиницей"
+  ask LLM_BASE_URL "адрес OpenAI-совместимого эндпоинта модели"
+  ask LLM_API_KEY "ключ эндпоинта (ввод скрыт)" silent
+  ask LLM_MODEL "модель, например openai/gpt-4.1"
   chmod 600 "$HERE/.env"
-  say "пароли записаны в $HERE/.env (пароль администратора — ADMIN_PASSWORD); впишите ORG, LLM_* и при необходимости APP_URL"
+  say "пароли записаны в $HERE/.env (пароль администратора — ADMIN_PASSWORD)"
 fi
 
 # ---- 8. Сборка и первый старт ----------------------------------------------------------------

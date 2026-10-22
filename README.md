@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/buffsystems/buff-community/releases"><img alt="Выпуск" src="https://img.shields.io/github/v/release/buffsystems/buff-community?label=выпуск&color=2563eb"></a>
+  <a href="https://github.com/buffsystems/buff-community/releases"><img alt="Выпуск" src="https://img.shields.io/github/v/release/buffsystems/buff-community?label=%D0%B2%D1%8B%D0%BF%D1%83%D1%81%D0%BA&color=2563eb"></a>
   <a href="https://github.com/buffsystems/buff-community/pkgs/container/buff-community"><img alt="Образ" src="https://img.shields.io/badge/ghcr.io-buff--community-2563eb?logo=docker&logoColor=white"></a>
   <a href="LICENSE.md"><img alt="Лицензия" src="https://img.shields.io/badge/лицензия-Buff%20Community-64748b"></a>
   <a href="https://buff.systems/docs/self-hosted/community"><img alt="Документация" src="https://img.shields.io/badge/документация-buff.systems-0b0d12"></a>

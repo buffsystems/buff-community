@@ -56,6 +56,14 @@ else
 fi
 
 if [ "$MODE" = linux ]; then
+  # needrestart на Ubuntu 24.04 после обновления пакетов (и автообновлений свежей машины) сам
+  # перезапускает службы, в том числе sysbox: у работающего контейнера отваливается /proc, и
+  # docker exec в него больше не проходит. Пусть только сообщает — как на машинах SaaS (#424).
+  if [ -d /etc/needrestart ]; then
+    sudo install -d -m 0755 /etc/needrestart/conf.d
+    echo "\$nrconf{restart} = 'l';" | sudo tee /etc/needrestart/conf.d/buff-install.conf >/dev/null
+  fi
+
   # ---- 1. Docker Engine -----------------------------------------------------------------------
   if ! command -v docker >/dev/null 2>&1; then
     say "ставлю Docker Engine (официальный репозиторий Docker)"

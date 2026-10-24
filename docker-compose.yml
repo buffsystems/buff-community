@@ -179,6 +179,7 @@ services:
       LLM_API_KEY: "${LLM_API_KEY:-}"
       LLM_MODEL: "${LLM_MODEL:-}"
       LICENSE_RELAY_URL: "${LICENSE_RELAY_URL:-wss://buff.systems/nats}"
+      MOBILE_DEMO: "${MOBILE_DEMO:-}"
       # Образ песочницы агента (#620): собирает install.sh поверх стокового Windmill и передаёт сюда.
       AGENT_IMAGE: "${SANDBOX_IMAGE:-buff-community-sandbox:local}"
     ports:

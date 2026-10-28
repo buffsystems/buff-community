@@ -60,7 +60,7 @@ cd buff-community
 ./install.sh
 ```
 
-The script asks for the organisation name, the administrator's e-mail and the model endpoint, installs Docker (and Sysbox on Linux), pulls the image, builds the agent sandbox and shows the first start right in the terminal — until the line **готово** (ready). Then:
+The script asks for the organisation name, the administrator's e-mail and the model endpoint, installs Docker (and Sysbox on Linux), pulls the image, builds the agent sandbox and shows the first start right in the terminal — until the line **готово** (ready). It speaks your system's language (English or Russian); to choose explicitly, run `./install.sh --lang=en` or set `BUFF_LANG=en`. Then:
 
 - the application at `http://<host>:8138/app/`, login `admin`, password `ADMIN_PASSWORD` from `.env`;
 - the admin panel at `http://<host>:8150`: users, model, workers, licence;

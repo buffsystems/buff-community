@@ -171,6 +171,8 @@ services:
       WM_ADMIN_PASSWORD: "${WM_ADMIN_PASSWORD:?задайте WM_ADMIN_PASSWORD в .env}"
       APP_URL: "${APP_URL:?задайте APP_URL в .env — адрес, по которому люди откроют приложение}"
       ORG: "${ORG:?задайте ORG в .env — имя вашей организации (латиницей)}"
+      # The language the first start speaks in the installer's terminal (#717): ru | en.
+      BUFF_LANG: "${BUFF_LANG:-ru}"
       ADMIN_USER: "${ADMIN_USER:-admin}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:?задайте ADMIN_PASSWORD в .env}"
       ADMIN_EMAIL: "${ADMIN_EMAIL:?задайте ADMIN_EMAIL в .env}"

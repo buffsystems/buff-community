@@ -202,6 +202,7 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   cp "$HERE/.env.example" "$HERE/.env"
   put() { sed -i.bak "s#^$1=.*#$1=$2#" "$HERE/.env" && rm -f "$HERE/.env.bak"; }
   put APP_URL "http://${ip:-127.0.0.1}:8138"
+  put BUFF_LANG "$INSTALL_LANG"
   # Почта администратора нужна внутреннему git-серверу настоящей: «admin@localhost» он отвергает.
   [ -z "$ip" ] || put ADMIN_EMAIL "admin@${ip}"
   put ADMIN_PASSWORD "$(rand 20)"
@@ -246,7 +247,7 @@ follow_bootstrap() {
         | while IFS= read -r l; do printf '  %4ds  %s\n' "$(($(date +%s) - started))" "$l"; done
       seen=$n
     fi
-    if grep -q 'готово:' "$log"; then kill "$lp" 2>/dev/null; rm -f "$log"; return 0; fi
+    if grep -qE 'готово:|ready:' "$log"; then kill "$lp" 2>/dev/null; rm -f "$log"; return 0; fi
     state="$($D inspect -f '{{.State.Status}}' "$cid" 2>/dev/null || true)"
     if [ -n "$state" ] && [ "$state" != "running" ]; then
       kill "$lp" 2>/dev/null; tail -n 20 "$log" >&2; rm -f "$log"

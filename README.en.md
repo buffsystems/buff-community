@@ -14,7 +14,7 @@
   <a href="https://github.com/buffsystems/buff-community/releases"><img alt="Release" src="https://img.shields.io/github/v/release/buffsystems/buff-community?label=release&color=2563eb"></a>
   <a href="https://github.com/buffsystems/buff-community/pkgs/container/buff-community"><img alt="Image" src="https://img.shields.io/badge/ghcr.io-buff--community-2563eb?logo=docker&logoColor=white"></a>
   <a href="LICENSE.md"><img alt="Licence" src="https://img.shields.io/badge/licence-Buff%20Community-64748b"></a>
-  <a href="https://buff.systems/docs/self-hosted/community"><img alt="Docs" src="https://img.shields.io/badge/docs-buff.systems-0b0d12"></a>
+  <a href="https://buff.systems/en/docs/self-hosted/community"><img alt="Docs" src="https://img.shields.io/badge/docs-buff.systems-0b0d12"></a>
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
   <a href="docs/install.en.md">Full guide</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#videos">Videos</a> ·
-  <a href="https://buff.systems/docs/self-hosted/community">Documentation</a> ·
+  <a href="https://buff.systems/en/docs/self-hosted/community">Documentation</a> ·
   <a href="README.md">Русский</a>
 </p>
 
@@ -116,7 +116,7 @@ https://github.com/user-attachments/assets/481da974-11fa-495a-a660-3549f52888a2
 | Model | yours | yours | ours or yours |
 | Price | free | a licence per organisation, monthly | per token |
 
-More: [Editions](https://buff.systems/docs/self-hosted) and [pricing](https://buff.systems/pricing).
+More: [Editions](https://buff.systems/en/docs/self-hosted) and [pricing](https://buff.systems/en/pricing).
 
 ## Contributing and licence
 

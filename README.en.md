@@ -14,7 +14,7 @@
   <a href="https://github.com/buffsystems/buff-community/releases"><img alt="Release" src="https://img.shields.io/github/v/release/buffsystems/buff-community?label=release&color=2563eb"></a>
   <a href="https://github.com/buffsystems/buff-community/pkgs/container/buff-community"><img alt="Image" src="https://img.shields.io/badge/ghcr.io-buff--community-2563eb?logo=docker&logoColor=white"></a>
   <a href="LICENSE.md"><img alt="Licence" src="https://img.shields.io/badge/licence-Buff%20Community-64748b"></a>
-  <a href="https://buff.systems/docs/self-hosted/community"><img alt="Docs" src="https://img.shields.io/badge/docs-buff.systems-0b0d12"></a>
+  <a href="https://buff.systems/en/docs/self-hosted/community"><img alt="Docs" src="https://img.shields.io/badge/docs-buff.systems-0b0d12"></a>
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
   <a href="docs/install.en.md">Full guide</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#videos">Videos</a> ·
-  <a href="https://buff.systems/docs/self-hosted/community">Documentation</a> ·
+  <a href="https://buff.systems/en/docs/self-hosted/community">Documentation</a> ·
   <a href="README.md">Русский</a>
 </p>
 
@@ -60,13 +60,19 @@ cd buff-community
 ./install.sh
 ```
 
-The script asks for the organisation name, the administrator's e-mail and the model endpoint, installs Docker (and Sysbox on Linux), pulls the image, builds the agent sandbox and shows the first start right in the terminal — until the line **готово** (ready). Then:
+The script asks for the organisation name, the administrator's e-mail and the model endpoint, installs Docker (and Sysbox on Linux), pulls the image, builds the agent sandbox and shows the first start right in the terminal — until the line **готово** (ready). It speaks your system's language (English or Russian); to choose explicitly, run `./install.sh --lang=en` or set `BUFF_LANG=en`. Then:
 
 - the application at `http://<host>:8138/app/`, login `admin`, password `ADMIN_PASSWORD` from `.env`;
 - the admin panel at `http://<host>:8150`: users, model, workers, licence;
 - the licence: in Admin → Licence enter the organisation and e-mail — the installation registers at buff.systems and receives the perpetual Community licence (3 users, 15 concurrent developments, one organisation).
 
 Update: `git pull && ./install.sh`. Remove: `docker compose down -v`. Everything else is in the [full guide](docs/install.en.md): `.env` settings, the connector to your git providers, backups, troubleshooting, Docker Desktop — with screenshots.
+
+## Mobile app
+
+Pair a phone in the workspace: “Settings → Phone” — a QR code, or a link and a code. The installation only needs outbound access to buff.systems: the phone and the installation meet at its gateway and encrypt everything end to end, so no ports need to be opened to the outside. Who may pair phones and whether notifications are sent is set in the admin panel, under “Mobile app”.
+
+The app is on the App Store and Google Play, with links at [buff.systems/en/mobile](https://buff.systems/en/mobile); pairing step by step is [in the knowledge base](https://buff.systems/en/docs/mobile/pair-cabinet).
 
 ## How it works
 
@@ -116,7 +122,7 @@ https://github.com/user-attachments/assets/481da974-11fa-495a-a660-3549f52888a2
 | Model | yours | yours | ours or yours |
 | Price | free | a licence per organisation, monthly | per token |
 
-More: [Editions](https://buff.systems/docs/self-hosted) and [pricing](https://buff.systems/pricing).
+More: [Editions](https://buff.systems/en/docs/self-hosted) and [pricing](https://buff.systems/en/pricing).
 
 ## Contributing and licence
 

@@ -1,6 +1,6 @@
 # Buff Community Edition: installation and setup
 
-*[Русская версия](install.md)* · the same page on the site (in Russian): [buff.systems/docs/self-hosted/community](https://buff.systems/docs/self-hosted/community)
+*[Русская версия](install.md)* · the same page on the site: [buff.systems/en/docs/self-hosted/community](https://buff.systems/en/docs/self-hosted/community)
 
 A step-by-step guide from an empty machine to the first task. The short version is in the [README](../README.en.md). The product UI is in Russian; the screenshots show it as it is.
 

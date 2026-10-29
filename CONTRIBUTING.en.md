@@ -10,7 +10,7 @@ Thank you for helping. This repository is the **installation kit** of the Commun
 - **Kit changes** — `install.sh`, compose, example settings, documentation and translations — via a pull request.
 - **Product proposals** — an issue labelled "proposal": what you want, why, and how it looks to the user.
 
-Enterprise purchases and commercial questions go through [buff.systems](https://buff.systems/#contact), not here.
+Enterprise purchases and commercial questions go through [buff.systems](https://buff.systems/en#contact), not here.
 
 ## Pull requests
 

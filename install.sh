@@ -178,7 +178,11 @@ build_sandbox() {
     zstd -dc "$dir/$file" | $D load >/dev/null
   else
     say "собираю образ песочницы $image поверх Windmill (несколько минут — ход ниже)" "building sandbox image $image on top of Windmill (a few minutes — progress below)"
-    $D build -t "$image" --build-arg "BUFF_IMAGE=$base" --build-arg "WINDMILL_IMAGE=$windmill" "$HERE/sandbox" || die "образ песочницы не собрался — смотрите вывод выше" "the sandbox image did not build — see the output above"
+    # Платформа песочницы — платформа образа Buff, а не машины: в песочницу едет его движок.
+    # На Mac с Apple Silicon Windmill пришёл бы под arm64, а движок amd64 в нём не запустится.
+    local platform
+    platform="$($D image inspect -f '{{.Os}}/{{.Architecture}}' "$base")" || die "образа $base в docker нет" "image $base is not in docker"
+    $D build --platform "$platform" -t "$image" --build-arg "BUFF_IMAGE=$base" --build-arg "WINDMILL_IMAGE=$windmill" "$HERE/sandbox" || die "образ песочницы не собрался — смотрите вывод выше" "the sandbox image did not build — see the output above"
   fi
   $D image inspect "$image" >/dev/null 2>&1 || die "образа песочницы $image в docker нет" "sandbox image $image is not in docker"
 }

@@ -240,7 +240,7 @@ fi
 # Ход первого старта виден здесь: строки «[bootstrap]» нашего контейнера до «готово». Повторный
 # запуск уже работающей сборки ничего не ждёт.
 follow_bootstrap() {
-  local since="$1" cid="$2" started log lp n seen=0 state
+  local since="$1" cid="$2" started log lp n seen=0 state bs
   started=$(date +%s); log="$(mktemp)"
   $D compose logs -f --no-log-prefix --since "$since" buff >"$log" 2>&1 &
   lp=$!
@@ -258,7 +258,10 @@ follow_bootstrap() {
       die "контейнер buff остановился (состояние: $state) — выше последние строки его журнала; полный: docker compose logs buff" "the buff container stopped (state: $state) — its last log lines are above; the full log: docker compose logs buff"
     fi
     # Первый старт — программа bootstrap под супервизором: её выход без «готово» — провал.
-    if $D exec "$cid" supervisorctl status bootstrap 2>/dev/null | grep -qE 'EXITED|FATAL'; then
+    # Статус снимается отдельно (#729): для завершённой программы supervisorctl отвечает кодом 3,
+    # и под pipefail конвейер «status | grep» был бы ложью даже при найденном EXITED.
+    bs="$($D exec "$cid" supervisorctl status bootstrap 2>/dev/null || true)"
+    if grep -qE 'EXITED|FATAL' <<<"$bs"; then
       kill "$lp" 2>/dev/null
       grep '\[bootstrap\]' "$log" | tail -n 5 | sed "s/.*\[bootstrap\]$(printf '\033')\[0m //; s/.*\[bootstrap\] //" >&2
       rm -f "$log"

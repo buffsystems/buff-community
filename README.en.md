@@ -65,6 +65,7 @@ The script asks for the organisation name, the administrator's e-mail and the mo
 - the application at `http://<host>:8138/app/`, login `admin`, password `ADMIN_PASSWORD` from `.env`;
 - the admin panel at `http://<host>:8150`: users, model, workers, licence;
 - the licence: the first start registers the installation at buff.systems with the organisation and e-mail from `.env` (`ORG`, `ADMIN_EMAIL`) and receives the perpetual Community licence (3 users, 15 concurrent developments, one organisation); to change them — Admin → Licence.
+- concurrent runs: `RUNNERS` in `.env` — that many audit domains, subtasks and research runs go at once. `install.sh` sets it from Docker's memory (about 1.2 GB per runner on top of ~3.5 GB for the stack itself); more than fits in memory and runs die of out-of-memory. To change it — `RUNNERS` in `.env` and `docker compose up -d`; on Docker Desktop give it more memory first (Settings → Resources).
 
 Update: `git pull && ./install.sh`. Remove: `docker compose down -v`. Everything else is in the [full guide](docs/install.en.md): `.env` settings, the connector to your git providers, backups, troubleshooting, Docker Desktop — with screenshots.
 

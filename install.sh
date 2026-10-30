@@ -38,6 +38,20 @@ if [ "$INSTALL_LANG" != en ] && [ "$INSTALL_LANG" != ru ]; then
 fi
 pick() { if [ "$INSTALL_LANG" = en ] && [ -n "${2:-}" ]; then printf '%s' "$2"; else printf '%s' "$1"; fi; }
 say() { printf '\033[1m[buff]\033[0m %s\n' "$(pick "$@")"; }
+
+# Сколько раннеров по памяти Docker (#730): ~3,5 ГБ уходит на сам стек (контейнер buff, база,
+# git, оркестратор), ~1,2 ГБ — на каждый одновременный прогон (движок агента, песочница, её
+# MCP-серверы). Больше, чем влезает, — ядро убивает прогоны по нехватке памяти. 1…15 (15 —
+# предел Community); память неизвестна — 3, как раньше.
+runners_for() {
+  local mb="$1" n
+  [ "${mb:-0}" -gt 0 ] 2>/dev/null || { echo 3; return; }
+  n=$(( (mb - 3584) / 1229 ))
+  [ "$n" -ge 1 ] || n=1
+  [ "$n" -le 15 ] || n=15
+  echo "$n"
+}
+
 die() { printf '\033[1;31m[buff]\033[0m %s\n' "$(pick "$@")" >&2; exit 1; }
 
 # ---- режим ----------------------------------------------------------------------------------
@@ -213,6 +227,10 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   put PG_PASSWORD "$(rand 32)"
   put GITEA_ADMIN_PASSWORD "$(rand 24)"
   put WM_ADMIN_PASSWORD "$(rand 24)"
+  mem_mb=$(( $($D info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1048576 ))
+  put RUNNERS "$(runners_for "$mem_mb")"
+  say "раннеров: $(runners_for "$mem_mb") — по памяти Docker ($((mem_mb / 1024)) ГБ); поменять — RUNNERS в .env и docker compose up -d" \
+    "runners: $(runners_for "$mem_mb") — by Docker's memory ($((mem_mb / 1024)) GB); to change — RUNNERS in .env and docker compose up -d"
   if [ "$MODE" = desktop ]; then sed -i.bak 's#^\# COMPOSE_FILE=#COMPOSE_FILE=#' "$HERE/.env" && rm -f "$HERE/.env.bak"; fi
   # Своё — спрашиваем здесь, пока сборка не поднята: переменная окружения (ORG=acme ./install.sh)
   # имеет приоритет, в терминале — вопрос с умолчанием, без терминала — умолчание из .env.example.

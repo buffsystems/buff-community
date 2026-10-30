@@ -228,7 +228,7 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   }
   say "настройки установки (Enter — оставить как есть, поправить можно потом в .env)" "installation settings (Enter keeps the value; you can change them later in .env)"
   ask ORG "имя вашей организации латиницей" "your organisation's name in Latin letters"
-  ask ADMIN_EMAIL "почта администратора" "the administrator's email"
+  ask ADMIN_EMAIL "почта администратора (с ней установка регистрируется на buff.systems)" "the administrator's email (the installation registers at buff.systems with it)"
   ask LLM_BASE_URL "адрес OpenAI-совместимого эндпоинта модели" "the address of the model's OpenAI-compatible endpoint"
   ask LLM_API_KEY "ключ эндпоинта (ввод скрыт)" "the endpoint key (hidden input)" silent
   ask LLM_MODEL "модель, например openai/gpt-4.1" "the model, for example openai/gpt-4.1"

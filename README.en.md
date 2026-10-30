@@ -64,7 +64,7 @@ The script asks for the organisation name, the administrator's e-mail and the mo
 
 - the application at `http://<host>:8138/app/`, login `admin`, password `ADMIN_PASSWORD` from `.env`;
 - the admin panel at `http://<host>:8150`: users, model, workers, licence;
-- the licence: in Admin → Licence enter the organisation and e-mail — the installation registers at buff.systems and receives the perpetual Community licence (3 users, 15 concurrent developments, one organisation).
+- the licence: the first start registers the installation at buff.systems with the organisation and e-mail from `.env` (`ORG`, `ADMIN_EMAIL`) and receives the perpetual Community licence (3 users, 15 concurrent developments, one organisation); to change them — Admin → Licence.
 
 Update: `git pull && ./install.sh`. Remove: `docker compose down -v`. Everything else is in the [full guide](docs/install.en.md): `.env` settings, the connector to your git providers, backups, troubleshooting, Docker Desktop — with screenshots.
 
@@ -87,7 +87,7 @@ The app is on the App Store and Google Play, with links at [buff.systems/en/mobi
 - **One image of ours**, `ghcr.io/buffsystems/buff-community` (~1.4 GB): all Buff services under a supervisor and an inner docker for the sandboxes. On Linux it is a Sysbox system container, no `privileged`; on Docker Desktop it runs privileged.
 - **Stock images** of PostgreSQL, Gitea (internal git storage), NATS, Windmill (the orchestrator and its workers) and Apache Tika — from their registries, on their authors' terms.
 - **The agent sandbox** is `buff-community-sandbox`, an image `install.sh` builds on your machine on top of Windmill (all language runtimes, as in SaaS). Every run gets its own container on an internal network: the only way out is the run's broker with the run's key, to the model and git at your addresses.
-- **Nothing leaves your machine** except requests to your model, your git providers and the daily licence check at buff.systems (four fields: installation id, version, the number of users and runners).
+- **Nothing leaves your machine** except requests to your model, your git providers, the installation's registration on first start (the organisation name and the administrator's e-mail) and the daily licence check at buff.systems (four fields: installation id, version, the number of users and runners).
 
 ## Videos
 

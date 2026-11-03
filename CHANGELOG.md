@@ -1,5 +1,20 @@
 # Buff Community Edition — выпуски
 
+## v0.23.4 — 2026-11-03
+
+Образ: `v0.23.4`. Снимок:
+- cloud-front `b8bb5c0ce1ec`
+- cloud-middle `be86edfaeb5b`
+- auth-worker `18fa8a87b59c`
+- backend-api `21b9548b2d7a`
+- admin `6bbe0635610b`
+- ask-worker `a4524663bd74`
+- bot-worker `ca20e1e70da8`
+- wm-flows `02cc79be6b31`
+- common-lib `f791cbbceca5`
+- mcp `a04224e68299`
+- deploy `3bee5f5b363b`
+
 ## v0.23.1 — 2026-11-01
 
 Образ: `v0.23.1`. Снимок:

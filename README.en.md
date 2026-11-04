@@ -73,7 +73,7 @@ Update: `git pull && ./install.sh`. Remove: `docker compose down -v`. Everything
 
 Pair a phone in the workspace: “Settings → Phone” — a QR code, or a link and a code. The installation only needs outbound access to buff.systems: the phone and the installation meet at its gateway and encrypt everything end to end, so no ports need to be opened to the outside. Who may pair phones and whether notifications are sent is set in the admin panel, under “Mobile app”.
 
-The app is on the App Store and Google Play, with links at [buff.systems/en/mobile](https://buff.systems/en/mobile); pairing step by step is [in the knowledge base](https://buff.systems/en/docs/mobile/pair-cabinet).
+The Android app is on [RuStore](https://www.rustore.ru/catalog/app/systems.buff.app); Google Play and the App Store are coming, with the current links at [buff.systems/en/mobile](https://buff.systems/en/mobile). The APK and ipa of every version are in this repository's [releases](https://github.com/buffsystems/buff-community/releases). Pairing step by step is [in the knowledge base](https://buff.systems/en/docs/mobile/pair-cabinet).
 
 ## How it works
 

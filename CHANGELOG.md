@@ -1,5 +1,23 @@
 # Buff Community Edition — выпуски
 
+## v0.24.1 — 2026-11-10
+
+## Что нового
+
+Исправления v0.24.0:
+
+- Глубокие исследования, задачи и аудиты больше не останавливаются на первом шаге с внутренней ошибкой. Исследование, которое успело упасть, можно продолжить кнопкой «Продолжить».
+- Админка: если сохранение в окне не прошло, причина видна в самом окне, а не за ним.
+- Телефон: в подробностях сессии Buff Code видны MCP-серверы машины; сессия, начатая в терминале, так и помечена; ссылка «ссылка и код», открытая извне, открывает ввод кода с этой ссылкой.
+
+## What's new
+
+Fixes to v0.24.0:
+
+- Deep research, tasks and audits no longer stop at their first step with an internal error. A research that already failed can be resumed with "Continue".
+- Admin panel: when a save in a dialog is refused, the reason shows in the dialog itself, not behind it.
+- Phone: Buff Code session details list the machine's MCP servers; a session started in the terminal is marked as such; a "link and code" link opened from outside opens code entry with that link.
+
 ## v0.24.0 — 2026-11-10
 
 ## Что нового

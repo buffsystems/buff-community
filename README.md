@@ -43,7 +43,7 @@ https://github.com/user-attachments/assets/32c45255-1b63-4d89-8dc4-956e112542cc
 | **Глубокое исследование** | Два агента — аналитик и ревьюер — прорабатывают вопрос по вашим источникам и готовят выверенный документ: Markdown и PDF. |
 | **База знаний** | То, что команда выяснила, остаётся в организации: записи с источниками, которыми пользуются и люди, и агенты. |
 | **Buff Code** | Терминал для инженеров: та же организация, её модели и база знаний — из командной строки. Сессии видны в кабинете. |
-| **Мобильное приложение** | iPhone и Android: задачи, ревью, «Спросить» и сессии Buff Code с телефона, уведомления — со сквозным шифрованием через шлюз buff.systems. |
+| **Мобильное приложение** | iPhone и Android: задачи, ревью, «Спросить» и сессии Buff Code с телефона, уведомления — со сквозным шифрованием через шлюз buff.systems. Приложение — в [buff-mobile](https://github.com/buffsystems/buff-mobile). |
 | **Коннектор** | Встроенный коннектор к вашим git-провайдерам и источникам знаний (Notion, Confluence, Google Docs и др.) — токены остаются на вашей машине. |
 
 <p align="center">
@@ -74,7 +74,7 @@ cd buff-community
 
 Подключите телефон в кабинете: «Настройки → Телефон» — QR-код или ссылка и код. Установке нужен только исходящий доступ к buff.systems: телефон и установка встречаются на его шлюзе и шифруют всё сквозным шифрованием, порты наружу открывать не нужно. Кто может подключать телефоны и идут ли уведомления, задаёт админка, раздел «Мобильное приложение».
 
-Приложение для Android — в [RuStore](https://www.rustore.ru/catalog/app/systems.buff.app); Google Play и App Store — скоро, актуальные ссылки на [buff.systems/mobile](https://buff.systems/mobile). APK и ipa каждой версии лежат в [выпусках](https://github.com/buffsystems/buff-community/releases) этого репозитория. Подключение по шагам — [в базе знаний](https://buff.systems/docs/mobile/pair-cabinet).
+Приложение для Android — в [RuStore](https://www.rustore.ru/catalog/app/systems.buff.app); Google Play и App Store — скоро, актуальные ссылки на [buff.systems/mobile](https://buff.systems/mobile). Сборки каждой версии для Android и iPhone и инструкции по установке — в репозитории [buff-mobile](https://github.com/buffsystems/buff-mobile). Подключение по шагам — [в базе знаний](https://buff.systems/docs/mobile/pair-cabinet).
 
 ## Как это работает
 

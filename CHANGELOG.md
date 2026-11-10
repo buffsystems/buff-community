@@ -1,5 +1,67 @@
 # Buff Community Edition — выпуски
 
+## v0.24.0 — 2026-11-10
+
+## Что нового
+
+### Публичные ссылки на диалоги
+Ответ из «Спросить» или исследование можно отдать по ссылке человеку без доступа к Buff — коллеге, заказчику, подрядчику. Ссылку можно закрыть паролем и в любой момент отозвать ссылку. Пока Buff ещё отвечает, страница по ссылке обновляется вживую. Все ссылки собраны в «Настройки → Публичные диалоги».
+
+### Вопрос в очередь, пока Buff отвечает
+Следующий вопрос в «Спросить» можно задать, не дожидаясь ответа: он встанет в очередь с отметкой «В очереди» и уйдёт, как только Buff закончит.
+
+### Исследование, которое не удалось, объясняет причину
+Если исследование не завершилось, вы увидите, что пошло не так, и сможете возобновить его кнопкой «Продолжить».
+
+### Видно, что вышла новая версия
+Владельцы организации узнают о новом выпуске прямо в кабинете, а на экране лицензии видно, какая версия работает сейчас.
+
+### Модели и цены
+Каталог моделей и их цены берутся из шлюза моделей вашей установки, а расход считается по фактической стоимости каждого вызова.
+
+### Мобильное приложение
+- **Режим «Настройка».** С телефона можно попросить Buff Code подключить новый сервис. Агент задаёт вопросы формой, секреты вводятся скрыто, а вход в сервис возвращается прямо в приложение.
+- **Очередь сообщений.** Пока агент работает, можно писать дальше: сообщения ждут над полем ввода, любое можно убрать или отправить сразу.
+- **Публичные ссылки.** Поделиться можно сессией Buff Code, ответом «Спросить» или исследованием. Все ссылки — в «Настройки → Публичные ссылки».
+- **Видно, что делает агент:** план и список дел, работающие субагенты, режим разрешений, итог сжатия контекста, строка «Работает…» с таймером. Подряд идущие вызовы инструментов сворачиваются в одну строку.
+- **Управление моделью:** режим размышлений и размер контекстного окна для сессии Buff Code.
+- **«Параметры ИИ»** (с buff.systems и Enterprise): уровень размышлений и окно контекста при создании вопроса, исследования или задачи. Значение видно на чипе в сессии и меняется прямо там.
+- **Файлы:** HTML открывается как страница, с переключателем на исходный код; при загрузке виден прогресс.
+- **История:** ранние сообщения сессии догружаются при прокрутке вверх.
+- **Если модель не приняла файл,** приложение предлагает, как продолжить: разобрать файл через код или идти дальше без него.
+- **Первый запуск:** на пустом экране — карточки Buff Code, Buff Community и демо.
+- О выходе новой версии приложения сообщает раздел «О приложении».
+
+## What's new
+
+### Public links to conversations
+An Ask answer or a research can be shared by link with someone who has no Buff access, such as a colleague, a client or a contractor. Protect a link with a password, and revoke it at any time. While Buff is still answering, the shared page updates live. All links are listed in Settings → Public conversations.
+
+### Queue a question while Buff answers
+You can ask your next question in Ask without waiting for the answer. It is marked "Queued" and goes out as soon as Buff finishes.
+
+### A failed research tells you why
+If a research did not finish, you see what went wrong, and "Continue" resumes it.
+
+### You can see that a new version is out
+Organisation owners learn about a new release right in the cabinet, and the licence screen shows which version is running.
+
+### Models and prices
+The model catalogue and its prices come from your installation's model gateway, and spending follows the real cost of each call.
+
+### Mobile app
+- **Setup mode.** From the phone, ask Buff Code to connect a new service. The agent asks with a form, secrets are typed hidden, and the service sign-in comes back straight into the app.
+- **Message queue.** Keep writing while the agent works. Messages wait above the composer, and you can drop any of them or send it right away.
+- **Public links.** Share a Buff Code session, an Ask answer or a research. All links are in Settings → Public links.
+- **See what the agent is doing:** the plan and to-do list, working subagents, the permission mode, the compaction summary, and a "Working…" line with a timer. Tool calls in a row fold into one line.
+- **Model control:** the thinking mode and the context window size of a Buff Code session.
+- **"AI parameters"** (with buff.systems and Enterprise): the thinking level and context window when you create a question, a research or a task. The value shows on a chip in the session and can be changed right there.
+- **Files:** HTML opens as a page with a switch to the source, and downloads show their progress.
+- **History:** earlier messages of a session load as you scroll up.
+- **When the model refuses a file,** the app offers ways to go on: read the file with code, or continue without it.
+- **First start:** the empty screen shows Buff Code, Buff Community and demo cards.
+- "About" tells you when a newer app version is out.
+
 ## v0.23.5 — 2026-11-04
 
 Образ: `v0.23.5`. Снимок:

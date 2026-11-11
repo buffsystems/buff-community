@@ -1,5 +1,25 @@
 # Buff Community Edition — выпуски
 
+## v0.24.2 — 2026-11-11
+
+## Что нового
+
+Исправления и улучшения v0.24.1:
+
+- Запрос, по которому решение уже принято, сразу уходит из списка «Требует внимания» — в кабинете и на телефоне.
+- Страница публичной ссылки на сессию Buff Code показывает план чек-листом, субагентов и переданные файлы — карточками; сессию субагента можно открыть и прочитать.
+- Админка: отказ при сохранении называет поля так, как они подписаны в форме.
+- Мобильное приложение: сборки для Android и iPhone и инструкции по установке теперь в отдельном репозитории [buff-mobile](https://github.com/buffsystems/buff-mobile).
+
+## What's new
+
+Fixes and improvements to v0.24.1:
+
+- A request that already has its decision leaves the "Needs attention" list at once — in the cabinet and on the phone.
+- The public page of a shared Buff Code session shows the plan as a checklist, subagents and handed files as cards; a subagent's session can be opened and read.
+- Admin panel: a refused save names the fields by their labels in the form.
+- Mobile app: the Android and iPhone builds and the installation guides now live in a repository of their own, [buff-mobile](https://github.com/buffsystems/buff-mobile).
+
 ## v0.24.1 — 2026-11-10
 
 ## Что нового

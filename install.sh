@@ -52,6 +52,21 @@ runners_for() {
   echo "$n"
 }
 
+# Свободная память хоста в МБ (#886): на общей машине раннеры считаются по тому, что свободно сейчас,
+# а не по всей памяти. MEMINFO — для теста; нет файла (macOS, Windows) — 0, решает память Docker.
+available_mb() {
+  awk '/^MemAvailable:/ { print int($2 / 1024); f = 1 } END { if (!f) print 0 }' "${MEMINFO:-/proc/meminfo}" 2>/dev/null || echo 0
+}
+
+# Свои порты и адрес из окружения (#886): APP_PORT=… ADMIN_PORT=… BIND_IP=… ./install.sh — как ORG и LLM_*,
+# они попадают в .env, а адрес приложения идёт за портом (если APP_URL не задан явно).
+env_overrides() {
+  local v
+  for v in BIND_IP APP_PORT ADMIN_PORT RUNNERS; do [ -z "${!v:-}" ] || put "$v" "${!v}"; done
+  if [ -n "${APP_URL:-}" ]; then put APP_URL "$APP_URL"
+  elif [ -n "${APP_PORT:-}" ]; then put APP_URL "$(grep '^APP_URL=' "$HERE/.env" | cut -d= -f2- | sed -E "s#:[0-9]+\$#:${APP_PORT}#")"; fi
+}
+
 die() { printf '\033[1;31m[buff]\033[0m %s\n' "$(pick "$@")" >&2; exit 1; }
 
 # ---- режим ----------------------------------------------------------------------------------
@@ -227,10 +242,14 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   put PG_PASSWORD "$(rand 32)"
   put GITEA_ADMIN_PASSWORD "$(rand 24)"
   put WM_ADMIN_PASSWORD "$(rand 24)"
+  # Раннеры — по свободной памяти хоста, но не больше памяти Docker (на Desktop это память его ВМ).
   mem_mb=$(( $($D info --format '{{.MemTotal}}' 2>/dev/null || echo 0) / 1048576 ))
+  free_mb=$(available_mb)
+  if [ "$free_mb" -gt 0 ] && { [ "$mem_mb" -eq 0 ] || [ "$free_mb" -lt "$mem_mb" ]; }; then mem_mb=$free_mb; fi
   put RUNNERS "$(runners_for "$mem_mb")"
-  say "раннеров: $(runners_for "$mem_mb") — по памяти Docker ($((mem_mb / 1024)) ГБ); поменять — RUNNERS в .env и docker compose up -d" \
-    "runners: $(runners_for "$mem_mb") — by Docker's memory ($((mem_mb / 1024)) GB); to change — RUNNERS in .env and docker compose up -d"
+  say "раннеров: $(runners_for "$mem_mb") — по свободной памяти ($((mem_mb / 1024)) ГБ); поменять — RUNNERS в .env и docker compose up -d" \
+    "runners: $(runners_for "$mem_mb") — by free memory ($((mem_mb / 1024)) GB); to change — RUNNERS in .env and docker compose up -d"
+  env_overrides
   if [ "$MODE" = desktop ]; then sed -i.bak 's#^\# COMPOSE_FILE=#COMPOSE_FILE=#' "$HERE/.env" && rm -f "$HERE/.env.bak"; fi
   # Своё — спрашиваем здесь, пока сборка не поднята: переменная окружения (ORG=acme ./install.sh)
   # имеет приоритет, в терминале — вопрос с умолчанием, без терминала — умолчание из .env.example.
@@ -249,7 +268,7 @@ if [ -f "$HERE/docker-compose.yml" ] && [ ! -f "$HERE/.env" ]; then
   ask ADMIN_EMAIL "почта администратора (с ней установка регистрируется на buff.systems)" "the administrator's email (the installation registers at buff.systems with it)"
   ask LLM_BASE_URL "адрес OpenAI-совместимого эндпоинта модели" "the address of the model's OpenAI-compatible endpoint"
   ask LLM_API_KEY "ключ эндпоинта (ввод скрыт)" "the endpoint key (hidden input)" silent
-  ask LLM_MODEL "модель, например openai/gpt-4.1" "the model, for example openai/gpt-4.1"
+  ask LLM_MODEL "имя модели, как его знает эндпоинт (например glm-5.3-b300 или deepseek-chat), без префикса openai/" "the model name as the endpoint knows it (for example glm-5.3-b300 or deepseek-chat), without an openai/ prefix"
   chmod 600 "$HERE/.env"
   say "пароли записаны в $HERE/.env (пароль администратора — ADMIN_PASSWORD)" "passwords are written to $HERE/.env (the administrator password is ADMIN_PASSWORD)"
 fi

@@ -59,12 +59,16 @@ available_mb() {
 }
 
 # Свои порты и адрес из окружения (#886): APP_PORT=… ADMIN_PORT=… BIND_IP=… ./install.sh — как ORG и LLM_*,
-# они попадают в .env, а адрес приложения идёт за портом (если APP_URL не задан явно).
+# они попадают в .env, а адрес приложения идёт за портом и за адресом привязки (если APP_URL не задан
+# явно): сборка, привязанная к одному адресу, по адресу машины не отвечает.
 env_overrides() {
-  local v
+  local v url
   for v in BIND_IP APP_PORT ADMIN_PORT RUNNERS; do [ -z "${!v:-}" ] || put "$v" "${!v}"; done
-  if [ -n "${APP_URL:-}" ]; then put APP_URL "$APP_URL"
-  elif [ -n "${APP_PORT:-}" ]; then put APP_URL "$(grep '^APP_URL=' "$HERE/.env" | cut -d= -f2- | sed -E "s#:[0-9]+\$#:${APP_PORT}#")"; fi
+  if [ -n "${APP_URL:-}" ]; then put APP_URL "$APP_URL"; return; fi
+  url="$(grep '^APP_URL=' "$HERE/.env" | cut -d= -f2-)"
+  [ -z "${APP_PORT:-}" ] || url="$(printf '%s' "$url" | sed -E "s#:[0-9]+\$#:${APP_PORT}#")"
+  case "${BIND_IP:-}" in '' | 0.0.0.0) ;; *) url="$(printf '%s' "$url" | sed -E "s#^(https?://)[^:/]+#\1${BIND_IP}#")" ;; esac
+  put APP_URL "$url"
 }
 
 die() { printf '\033[1;31m[buff]\033[0m %s\n' "$(pick "$@")" >&2; exit 1; }

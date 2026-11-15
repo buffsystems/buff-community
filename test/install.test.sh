@@ -22,5 +22,11 @@ eval "$(fn env_overrides)"
 APP_PORT=9138 ADMIN_PORT=9150 BIND_IP=127.0.0.1 env_overrides
 check "ports and address from the environment reach .env" "$(grep -E '^(APP_PORT|ADMIN_PORT|BIND_IP)=' "$T/.env" | tr '\n' ' ')" "BIND_IP=127.0.0.1 APP_PORT=9138 ADMIN_PORT=9150 "
 check "the app address follows the port" "$(grep '^APP_URL=' "$T/.env")" "APP_URL=http://127.0.0.1:9138"
+printf 'APP_URL=http://203.0.113.7:8138\nBIND_IP=0.0.0.0\nAPP_PORT=8138\nADMIN_PORT=8150\nRUNNERS=3\n' > "$T/.env"
+APP_PORT=18138 BIND_IP=127.0.0.1 env_overrides
+check "a bound address replaces the machine's in the app address" "$(grep '^APP_URL=' "$T/.env")" "APP_URL=http://127.0.0.1:18138"
+printf 'APP_URL=http://203.0.113.7:8138\nBIND_IP=0.0.0.0\nAPP_PORT=8138\nADMIN_PORT=8150\nRUNNERS=3\n' > "$T/.env"
+APP_PORT=18138 BIND_IP=0.0.0.0 env_overrides
+check "all addresses keep the machine's address" "$(grep '^APP_URL=' "$T/.env")" "APP_URL=http://203.0.113.7:18138"
 rm -rf "$T"
 exit $fail

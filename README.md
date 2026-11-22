@@ -74,7 +74,7 @@ cd buff-community
 
 Подключите телефон в кабинете: «Настройки → Телефон» — QR-код или ссылка и код. Установке нужен только исходящий доступ к buff.systems: телефон и установка встречаются на его шлюзе и шифруют всё сквозным шифрованием, порты наружу открывать не нужно. Кто может подключать телефоны и идут ли уведомления, задаёт админка, раздел «Мобильное приложение».
 
-Приложение для Android — в [RuStore](https://www.rustore.ru/catalog/app/systems.buff.app); Google Play и App Store — скоро, актуальные ссылки на [buff.systems/mobile](https://buff.systems/mobile). Сборки каждой версии для Android и iPhone и инструкции по установке — в репозитории [buff-mobile](https://github.com/buffsystems/buff-mobile). Подключение по шагам — [в базе знаний](https://buff.systems/docs/mobile/pair-cabinet).
+Приложение для Android — в [Google Play](https://play.google.com/store/apps/details?id=systems.buff.app) и [RuStore](https://www.rustore.ru/catalog/app/systems.buff.app); App Store — скоро, актуальные ссылки на [buff.systems/mobile](https://buff.systems/mobile). Сборки каждой версии для Android и iPhone и инструкции по установке — в репозитории [buff-mobile](https://github.com/buffsystems/buff-mobile). Подключение по шагам — [в базе знаний](https://buff.systems/docs/mobile/pair-cabinet).
 
 ## Как это работает
 

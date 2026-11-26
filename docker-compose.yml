@@ -136,11 +136,14 @@ services:
     restart: unless-stopped
 
   nats:
-    image: nats:2.10-alpine
+    # 2.12: режим оператора (#974) — организации добавляются без перезагрузки шины и обрывов.
+    image: nats:2.12-alpine
     logging: *logging
-    # Конфиг шины пишет наш контейнер при первом старте (ключи callout, аккаунты организаций);
-    # до его появления сервер ждёт. Дальше — тот же обёртка-вход, что у middleware.
-    command: ["sh", "-c", "while [ ! -s /config/nats-server.conf ] || [ ! -s /config/scripts/nats-entrypoint.sh ]; do sleep 2; done; exec sh /config/scripts/nats-entrypoint.sh"]
+    # Конфиг шины пишет наш контейнер при старте (ключи оператора и callout); до его появления
+    # сервер ждёт. jetstream-renames появляется последним — значит, конфиг и обёртка этой версии
+    # на месте: обёртка переносит данные JetStream при переходе в режим оператора (#974). Дальше —
+    # та же обёртка-вход, что у middleware: новый конфиг — перезапуск шины.
+    command: ["sh", "-c", "while [ ! -s /config/nats-server.conf ] || [ ! -s /config/scripts/nats-entrypoint.sh ] || [ ! -e /config/jetstream-renames ]; do sleep 2; done; exec sh /config/scripts/nats-entrypoint.sh"]
     environment:
       NATS_CONF: /config/nats-server.conf
     volumes:

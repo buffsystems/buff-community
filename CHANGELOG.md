@@ -1,5 +1,19 @@
 # Buff Community Edition — выпуски
 
+## v0.28.0 — 2026-11-27
+
+## Что нового
+
+- **Новая организация больше не прерывает работу остальных.** Раньше добавление организации на несколько секунд обрывало все соединения установки; теперь ретранслятор принимает новые организации на лету. Обновление установки один раз перезапускает ретранслятор.
+- **Графики и наглядные блоки в чатах** Buff Code — в окне, в браузере и на телефоне.
+- **Регистрация без приветственного пополнения:** новый пользователь сразу попадает в обзорный тур.
+
+## What's new
+
+- **A new organisation no longer interrupts everyone else.** Adding an organisation used to drop every connection of the installation for a few seconds; now the relay takes new organisations on the fly. Updating the installation restarts the relay once.
+- **Charts and visuals in Buff Code chats** — in the window, in the browser and on the phone.
+- **Sign-up without the welcome top-up:** a new user goes straight to the overview tour.
+
 ## v0.27.0 — 2026-11-20
 
 Образ: `v0.27.0`.
